@@ -1,6 +1,6 @@
 template:
   name: readme
-  src: local>../../../../../ansibledoctor/templates
+  src: local>../../ansibledoctor/templates
   options:
     tabulate_vars: True
 
