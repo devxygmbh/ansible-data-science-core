@@ -35,10 +35,14 @@ Installs and configures R in an opinionated way:
 
 | Variable | Default | Description | Type |
 | -------- | ------- | ----------- | ---- |
-| r_additional_options |  | Additional default R options| list|
-| r_custom_repos |  | Additional CRAN-like repositories| list|
-| r_remove_unused_r_versions | true | | boolean|
-| r_versions | ['4.0.5', '4.1.3', '4.2.3', '4.3.3'] | | list|
+| `r_additional_options` |  | Additional default R options| `list`
+|
+| `r_custom_repos` |  | Additional CRAN-like repositories| `list`
+|
+| `r_remove_unused_r_versions` | `true` | | `boolean`
+|
+| `r_versions` | `['4.0.5', '4.1.3', '4.2.3', '4.3.3']` | | `list`
+|
 
 ## Requirements
 
