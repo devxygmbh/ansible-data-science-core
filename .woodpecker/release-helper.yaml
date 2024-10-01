@@ -11,3 +11,16 @@ steps:
       git_email: mail@devxy.io
       forge_token:
         from_secret: renovate_token
+    backend_options:
+      kubernetes:
+        ### PROD-parallel
+        resources:
+          requests:
+            memory: 300Mi
+            cpu: 100m
+          limits:
+            memory: 500Mi
+            cpu: 1000m
+        # pinning this prevents having to use a RWX for WP (and in turn longhorn) which then takes ~ 40s for the clone step
+        nodeSelector:
+          node.kubernetes.io/instance-type: cax31

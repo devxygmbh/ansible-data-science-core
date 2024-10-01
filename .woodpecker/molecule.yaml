@@ -30,6 +30,7 @@ steps:
             cpu: 4000m
         nodeSelector:
           kubernetes.io/arch: "arm64"
+          node.kubernetes.io/instance-type: cax31
 
   - name: "ntfy"
     image: codeberg.org/l-x/woodpecker-ntfy:1.3.1
@@ -55,6 +56,9 @@ steps:
           limits:
             memory: 300Mi
             cpu: 200m
+        nodeSelector:
+          kubernetes.io/arch: "arm64"
+          node.kubernetes.io/instance-type: cax31
 
 services:
   docker:
@@ -76,3 +80,4 @@ services:
             cpu: 4000m
         nodeSelector:
           kubernetes.io/arch: "arm64"
+          node.kubernetes.io/instance-type: cax31
