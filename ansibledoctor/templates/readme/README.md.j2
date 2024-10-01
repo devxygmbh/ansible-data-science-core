@@ -11,15 +11,15 @@
 {#      TOC      #}
 {% include '_toc.j2' +%}
 
-{#      Requirements      #}
-{% include '_requirements.j2' %}
-
 {#      Vars      #}
 {% if options.tabulate_vars %}
 {% include '_vars_tabulated.j2' %}
 {% else %}
 {% include '_vars.j2' %}
 {% endif %}
+
+{#      Requirements      #}
+{% include '_requirements.j2' %}
 
 {#      Tag      #}
 {% include '_tag.j2' %}
