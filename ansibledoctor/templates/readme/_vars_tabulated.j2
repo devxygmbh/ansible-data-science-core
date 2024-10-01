@@ -17,7 +17,7 @@
 {% endfor %}
 |
 {% for key, item in var | dictsort %}
-| {{ key }} | {{ (item.value | default({}))[key ] | default -}}{% raw %} {% endraw %}
+| {{ key }} | {{ (item.value | default({}))[key ] | lower | default -}}{% raw %} {% endraw %}
 {% if "description" in found_columns %}
 | {{ item.description | default([]) | safe_join("<br />") | replace("\n", "<br />") | replace("|", "\|") -}}
 {% endif %}
