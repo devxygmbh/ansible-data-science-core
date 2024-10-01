@@ -40,3 +40,10 @@ start SERVER:
 
 ansible-doctor:
     ansible-doctor roles -r
+
+galaxy-publish:
+    ansible-galaxy collection build && \
+    tarball=$(ls | grep devxy-) && \
+    ansible-galaxy collection install $tarball -p /Users/pjs/.ansible/collections && \
+    ansible-galaxy collection publish $tarball && \
+    rm $tarball

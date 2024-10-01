@@ -28,13 +28,6 @@ repos:
     hooks:
       - id: yamllint
         args: [--strict, -c=.yamllint.yaml]
-  - repo: local
-    hooks:
-      - id: yaml-file-extension
-        name: Check if YAML files has *.yaml extension.
-        entry: YAML filenames must have .yaml extension.
-        language: fail
-        files: .yml$
 
   - repo: https://github.com/ansible-community/ansible-lint
     rev: v6.21.1
