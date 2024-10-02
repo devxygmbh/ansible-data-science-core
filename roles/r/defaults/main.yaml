@@ -1,11 +1,26 @@
 # removes all R versions that are not in the r_versions list
-r_remove_old_r_versions: true
+# @var r_remove_unused_r_versions:type: boolean
+r_remove_unused_r_versions: true
 
-r_versions:
+# @var r_interpreter_versions:type: list
+r_interpreter_versions:
   - 4.0.5
   - 4.1.3
   - 4.2.3
   - 4.3.3
+
+# @var r_interpreter_install_binary:description: Set to `false` to install from a source tarball. The tarball must be named R-<version>.tar.gz. Also, set `r_interpreter_source_path` to the local path where the tarball is stored.
+# @var r_interpreter_install_binary:type: boolean
+r_interpreter_install_binary: true
+# @var r_interpreter_download_url:type: string
+# @var r_additional_options:description: Download URL for R interpreter binaries. Inspect the code for expected subpaths of each platform
+r_interpreter_download_url: https://devxy-r-builds.s3.eu-central-2.amazonaws.com
 ### Optional vars
-# r_r_custom_repos:
-# r_additional_options:
+# @var r_custom_repos:description: Additional CRAN-like repositories
+# @var r_custom_repos:type: list
+
+# @var r_additional_options:description: Additional default R options
+# @var r_additional_options:type: list
+
+# @var r_interpreter_source_path:description: Local path to R source tarball
+# @var r_interpreter_source_path:type: string

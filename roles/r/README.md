@@ -39,9 +39,15 @@ Installs and configures R in an opinionated way:
 |
 | `r_custom_repos` |  | Additional CRAN-like repositories| `list`
 |
-| `r_remove_unused_r_versions` | `true` | | `boolean`
+| `r_interpreter_download_url` | `https://devxy-r-builds.s3.eu-central-2.amazonaws.com` | | `string`
 |
-| `r_versions` | `['4.0.5', '4.1.3', '4.2.3', '4.3.3']` | | `list`
+| `r_interpreter_install_binary` | `true` | Set to `false` to install from a source tarball. The tarball must be named R-<version>.tar.gz. Also, set `r_interpreter_source_path` to the local path where the tarball is stored.| `boolean`
+|
+| `r_interpreter_source_path` |  | Local path to R source tarball| `string`
+|
+| `r_interpreter_versions` | `['4.0.5', '4.1.3', '4.2.3', '4.3.3']` | | `list`
+|
+| `r_remove_unused_r_versions` | `true` | | `boolean`
 |
 
 ## Requirements

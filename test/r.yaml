@@ -2,7 +2,11 @@
   hosts: all
   become: true
 
-  # vars:
+  vars:
+    r_interpreter_versions:
+      - 4.4.1
+    r_interpreter_install_binary: false
+    r_interpreter_source_path: /root
 
   roles:
     - role: r
