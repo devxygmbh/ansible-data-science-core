@@ -47,3 +47,8 @@ galaxy-publish:
     ansible-galaxy collection install $tarball -p /Users/pjs/.ansible/collections && \
     ansible-galaxy collection publish $tarball && \
     rm $tarball
+
+init-venv:
+    python3 -m venv ~/venv/ansible-doctor
+    source ~/venv/ansible-doctor/bin/activate.fish
+    python3 -m pip install ansible-doctor[ansible-core]
