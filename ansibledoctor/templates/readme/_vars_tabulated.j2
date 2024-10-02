@@ -17,12 +17,12 @@
 {% endfor %}
 |
 {% for key, item in var | dictsort %}
-| `{{ key }}` | `{{ (item.value | default({}))[key ] | lower | default -}}`{% raw %} {% endraw %}
+| `{{ key }}` | {% if (item.value | default({}))[key] | lower | default != "" %}`{{ (item.value | default({}))[key] | lower | default }}`{% else %}{{ (item.value | default({}))[key] | lower | default }}{% endif %}{% raw %} {% endraw %}
 {% if "description" in found_columns %}
 | {{ item.description | default([]) | safe_join("<br />") | replace("\n", "<br />") | replace("|", "\|") -}}
 {% endif %}
 {% if "type" in found_columns %}
-| {{ item.type | default([]) | join("<br />") -}}
+| `{{ item.type | default([]) | join("<br />") -}}`
 {% endif %}
 {% if "deprecated" in found_columns %}
 |
