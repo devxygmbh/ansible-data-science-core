@@ -1,5 +1,7 @@
 when:
-  event: [push, cron, manual]
+  - event: push
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+  - event: [pull_request, manual, cron]
 
 matrix:
   SCENARIO:
