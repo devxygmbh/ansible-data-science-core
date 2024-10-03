@@ -1,0 +1,8 @@
+when:
+  - event: pull_request
+
+steps:
+  commitlint:
+    image: commitlint/commitlint:19.5.0
+    commands:
+      - echo $${CI_COMMIT_MESSAGE} | commitlint
