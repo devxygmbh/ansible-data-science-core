@@ -1,6 +1,11 @@
 when:
   event: [push, cron, manual]
 
+matrix:
+  SCENARIO:
+    - r_default
+    # - r_install_source
+
 steps:
   - name: "Test devxy.core.r"
     image: library/docker:27.3.1-dind-alpine3.20
@@ -19,7 +24,7 @@ steps:
       - ansible --version
       - molecule --version
       - cd extensions
-      - molecule test --scenario-name r_default
+      - molecule test --scenario-name ${SCENARIO}
     backend_options:
       kubernetes:
         resources:
