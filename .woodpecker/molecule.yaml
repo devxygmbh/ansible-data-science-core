@@ -18,7 +18,7 @@ steps:
       - ansible --version
       - molecule --version
       - cd extensions
-      - molecule test
+      - molecule test --scenario-name r_default
     backend_options:
       kubernetes:
         resources:
