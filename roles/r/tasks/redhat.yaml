@@ -158,4 +158,4 @@
     path: /etc/Rprofile.site
     block: |
       options(install.packages.check.source = 'no',
-        repos = 'c(CRAN = "https://packagemanager.posit.co/cran/__linux__/{{ posit_os_identifier{{ ansible_distribution_major_version }}/latest")')
+        repos = 'c(CRAN = "https://packagemanager.posit.co/cran/__linux__/{{ posit_os_identifier}}{{ ansible_distribution_major_version }}/latest")')
