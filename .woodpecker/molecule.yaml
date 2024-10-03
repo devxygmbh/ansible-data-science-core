@@ -84,6 +84,3 @@ services:
           limits:
             memory: 1000Mi
             cpu: 4000m
-        nodeSelector:
-          kubernetes.io/arch: "arm64"
-          node.kubernetes.io/instance-type: cax31
