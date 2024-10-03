@@ -17,7 +17,7 @@ steps:
       - python3 -m pip install -q 'ansible-core<2.17' molecule-plugins[docker] cryptography
       - ansible --version
       - molecule --version
-      - cd ansible_collections/devxy/core/extensions
+      - cd extensions
       - molecule test
     backend_options:
       kubernetes:
