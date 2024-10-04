@@ -49,6 +49,8 @@ galaxy-publish:
     rm $tarball
 
 init-venv:
-    python3 -m venv ~/venv/ansible-doctor
-    source ~/venv/ansible-doctor/bin/activate.fish
-    python3 -m pip install ansible-doctor[ansible-core]
+    python3 -m venv ~/venv/ansible-ds-core && \
+    fish -c 'source ~/venv/ansible-ds-core/bin/activate.fish; python3 -m pip install ansible-doctor[ansible-core] "ansible-core<2.17" molecule-plugins[docker] cryptography'
+
+molecule scenario:
+    cd extensions molecule && molecule test --scenario-name {{scenario}}
