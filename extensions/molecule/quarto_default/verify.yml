@@ -1,0 +1,30 @@
+- name: Verify
+  hosts: all
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Find all Quarto executables under /opt/quarto
+      ansible.builtin.find:
+        paths: "/opt/quarto"
+        patterns: "quarto"
+        file_type: file
+        recurse: true
+        use_regex: false
+      register: quarto_installed
+
+    - name: Gather file stats for each R executable
+      ansible.builtin.stat:
+        path: "{{ item.path }}"
+      loop: "{{ quarto_installed.files }}"
+      register: quarto_files_stats
+
+    - name: Assert R binaries are executable
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.isreg
+          - item.stat.executable
+        msg: "R binary at {{ item.stat.path }} is not executable"
+      loop: "{{ quarto_files_stats.results }}"
+      when: item.stat.exists

@@ -1,8 +1,24 @@
-# defaults file for quarto
+# @var quarto_versions:type: list
 quarto_versions:
   - release
-  - pre-release
+  # - pre-release
   # - 1.2.232
-quarto_dest_dir: /opt/quarto
 
+# @var quarto_installation_dir:type: string
+# @var quarto_installation_dir:description: The directory in which to install Quarto
+quarto_installation_dir: /opt/quarto
+
+# @var quarto_add_to_path:type: boolean
+# @var quarto_add_to_path:description: Whether to add the executables to $PATH (bash)
 quarto_add_to_path: true
+# ---
+
+### Optional vars
+
+# @var quarto_custom_download_url:type: string
+# @var quarto_custom_download_url:description: URL for local download. Cannot be combined with dynamic release IDs like 'release'. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.
+# quarto_custom_download_url:
+
+# @var quarto_local_tarball_path:type: string
+# @var quarto_local_tarball_path:description: Local path to Quarto tarballs. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.
+# quarto_local_tarball_path:

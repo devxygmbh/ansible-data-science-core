@@ -1,0 +1,10 @@
+- name: Converge
+  hosts: all
+  gather_facts: true
+  vars:
+    quarto_versions:
+      - release
+      - pre-release
+      - 1.3.253
+  roles:
+    - role: quarto

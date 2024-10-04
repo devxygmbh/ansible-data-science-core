@@ -4,58 +4,83 @@
   when: quarto_versions | reject('search', 'release') | reject('search', 'prerelease') | list | length > 0
 
 - name: Get Quarto latest release from GitHub
+  when: quarto_custom_download_url is not defined and "'release' in quarto_versions"
   ansible.builtin.uri:
     url: https://api.github.com/repos/quarto-dev/quarto-cli/releases/latest
     return_content: true
     headers:
       Accept: "application/vnd.github.v3+json"
   register: latest_release
-  when: "'release' in quarto_versions"
 
 - name: Infer latest release Quarto version
+  when: quarto_custom_download_url is not defined and 'release' in quarto_versions
   ansible.builtin.set_fact:
     quarto_release_version: "{{ latest_release.json.tag_name | replace('v', '') }}"
-  when: "'release' in quarto_versions"
 
-- name: Get Quarto releases from GitHub
+# to infer the pre_release version, we need to query all releases
+- name: Get all Quarto releases from GitHub
+  when: quarto_custom_download_url is not defined and 'pre-release' in quarto_versions
   ansible.builtin.uri:
     url: https://api.github.com/repos/quarto-dev/quarto-cli/releases
     return_content: true
     headers:
       Accept: "application/vnd.github.v3+json"
   register: all_releases
-  when: "'pre-release' in quarto_versions"
 
 - name: Infer latest pre-release Quarto version
+  when: quarto_custom_download_url is not defined and 'pre-release' in quarto_versions
   ansible.builtin.set_fact:
     quarto_prerelease_version: "{{ (all_releases.json | selectattr('prerelease', 'equalto', true) | sort(attribute='created_at', reverse=true) | first).tag_name | replace('v', '') }}"
-  when: "'pre-release' in quarto_versions"
 
-- name: Combine quarto versions into a list
+- name: Combine quarto versions into a list (release + pre-release)
+  when: quarto_custom_download_url is not defined and 'pre-release' in quarto_versions and "'release' in quarto_versions"
   ansible.builtin.set_fact:
     quarto_versions: "{{ [quarto_release_version, quarto_prerelease_version] + (custom_quarto_versions | default([])) }}"
+
+- name: Combine quarto versions into a list (release + custom)
+  when: quarto_custom_download_url is not defined and "'release' in quarto_versions"
+  ansible.builtin.set_fact:
+    quarto_versions: "{{ [quarto_release_version] + (custom_quarto_versions | default([])) }}"
 
 - name: Define environment facts
   ansible.builtin.set_fact:
     arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
 
-- name: Download quarto binary
+- name: Download quarto binary (GitHub)
+  when: quarto_custom_download_url is not defined
   ansible.builtin.get_url:
     url: "https://github.com/quarto-dev/quarto-cli/releases/download/v{{ item }}/quarto-{{ item }}-linux-{{ arch }}.tar.gz"
     dest: "/tmp/quarto-{{ item }}.tar.gz"
     mode: "0644"
   loop: "{{ quarto_versions }}"
 
+- name: Download quarto binary (Local)
+  when: quarto_custom_download_url is defined and quarto_local_tarball_path is not defined
+  ansible.builtin.get_url:
+    url: "{{ quarto_custom_download_url }}/quarto-{{ item }}-linux-{{ arch }}.tar.gz"
+    dest: "/tmp/quarto-{{ item }}.tar.gz"
+    mode: "0644"
+  loop: "{{ quarto_versions }}"
+
+- name: Copy local tarballs to /tmp
+  when: quarto_local_tarball_path is defined
+  ansible.builtin.copy:
+    src: "quarto-{{ item }}-linux-{{ arch }}.tar.gz"
+    dest: "/tmp/quarto-{{ item }}.tar.gz"
+    remote_src: true
+    mode: "0755"
+  loop: "{{ quarto_versions }}"
+
 - name: Ensure quarto directory exists
   ansible.builtin.file:
-    path: "{{ quarto_dest_dir }}"
+    path: "{{ quarto_installation_dir }}"
     state: directory
     mode: "0755"
 
 - name: Extract quarto binary
   ansible.builtin.unarchive:
     src: "/tmp/quarto-{{ item }}.tar.gz"
-    dest: "{{ quarto_dest_dir }}"
+    dest: "{{ quarto_installation_dir }}"
     remote_src: true
   loop: "{{ quarto_versions }}"
 
@@ -70,7 +95,7 @@
   ansible.builtin.blockinfile:
     path: /etc/profile.d/quarto.sh
     block: |
-      export PATH={{ quarto_dest_dir }}/quarto-{{ quarto_versions | first }}/bin:$PATH
+      export PATH={{ quarto_installation_dir }}/quarto-{{ quarto_versions | first }}/bin:$PATH
     create: true
     state: present
     marker: "# {mark} ANSIBLE MANAGED BLOCK quarto"
