@@ -13,10 +13,10 @@ Installs and configures R in an opinionated way:
 
 ## Outbound Connectivity
 
-| Purpose                        | URL                                                  |
-| ------------------------------ | ---------------------------------------------------- |
-| Download R interpreter (arm64) | https://devxy-r-builds.s3.eu-central-2.amazonaws.com |
-| Download R interpreter (amd64) | https://cdn.posit.co                                 |
+| Purpose                        | URL                                                    |
+| ------------------------------ | ------------------------------------------------------ |
+| Download R interpreter (arm64) | <https://devxy-r-builds.s3.eu-central-2.amazonaws.com> |
+| Download R interpreter (amd64) | <https://cdn.posit.co>                                 |
 
 ## Supported Platforms
 

@@ -22,7 +22,7 @@
 | {{ item.description | default([]) | safe_join("<br />") | replace("\n", "<br />") | replace("|", "\|") -}}
 {% endif %}
 {% if "type" in found_columns %}
-| `{{ item.type | default([]) | join("<br />") -}}`
+| `{{ item.type | default([]) | join("<br />") -}}` |
 {% endif %}
 {% if "deprecated" in found_columns %}
 |
@@ -42,7 +42,6 @@ False
 {% endif %}
 {% if "example" in found_columns %}
 |{{ item.example | default([]) | safe_join("<br />") | replace("\n", "<br />") | replace("|", "\|") -}}
-{% endif %}
-|
+{% endif -%}
 {% endfor %}
 {% endif %}

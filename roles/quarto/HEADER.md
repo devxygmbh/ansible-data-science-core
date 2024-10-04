@@ -15,9 +15,9 @@ include_toc: true
 
 ## Outbound Connectivity
 
-| Purpose                                 | URL                                                |
-| --------------------------------------- | -------------------------------------------------- |
-| Infer latest release & Download release | https://api.github.com/repos/quarto-dev/quarto-cli |
+| Purpose                                 | URL                                                  |
+| --------------------------------------- | ---------------------------------------------------- |
+| Infer latest release & Download release | <https://api.github.com/repos/quarto-dev/quarto-cli> |
 
 ## Supported Platforms
 
