@@ -12,7 +12,7 @@ matrix:
     # - r_install_source
 
 steps:
-  - name: "Test ${SCENARIO}"
+  - name: 'Test ${SCENARIO}'
     image: library/docker:27.3.1-dind-alpine3.20
     privileged: true
     environment:
@@ -41,7 +41,7 @@ steps:
             memory: 1000Mi
             cpu: 4000m
 
-  - name: "ntfy"
+  - name: 'ntfy'
     image: codeberg.org/l-x/woodpecker-ntfy:1.3.1
     when:
       - status: [failure]
@@ -69,7 +69,7 @@ steps:
 services:
   docker:
     environment:
-      DOCKER_TLS_CERTDIR: ""
+      DOCKER_TLS_CERTDIR: ''
     image: docker:27-dind
     commands: dockerd --tls=false --host=tcp://0.0.0.0:2375
     privileged: true

@@ -2,12 +2,12 @@
   ansible.builtin.file:
     path: /opt/R
     state: directory
-    mode: "0755"
+    mode: '0755'
 
 - name: List installed R versions under /opt/R
   ansible.builtin.stat:
-    path: "/opt/R/{{ item }}/bin/R"
-  loop: "{{ r_interpreter_versions }}"
+    path: '/opt/R/{{ item }}/bin/R'
+  loop: '{{ r_interpreter_versions }}'
   register: r_installed
 
 - name: Execute RedHat tasks
@@ -20,28 +20,28 @@
 
 - name: Create Renviron and Rprofile
   ansible.builtin.blockinfile:
-    path: "/opt/R/{{ item }}/lib/R/etc/Renviron"
+    path: '/opt/R/{{ item }}/lib/R/etc/Renviron'
     block: |
       R_ENVIRON='/etc/Renviron.site'
       R_PROFILE='/etc/Rprofile.site'
       QUARTO_R=/opt/R/{{ item }}/lib/R/bin/R
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
-  loop: "{{ r_interpreter_versions }}"
+    marker: '# {mark} ANSIBLE MANAGED BLOCK'
+  loop: '{{ r_interpreter_versions }}'
 
 - name: Configure R-version specific Renviron
   ansible.builtin.blockinfile:
-    path: "/opt/R/{{ item }}/lib/R/etc/Renviron"
+    path: '/opt/R/{{ item }}/lib/R/etc/Renviron'
     block: |
       R_ENVIRON='/etc/Renviron.site'
       R_PROFILE='/etc/Rprofile.site'
       QUARTO_R=/opt/R/{{ item }}/lib/R/bin/R
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
-  loop: "{{ r_interpreter_versions }}"
+    marker: '# {mark} ANSIBLE MANAGED BLOCK'
+  loop: '{{ r_interpreter_versions }}'
 
 - name: Configure /etc/Rprofile.site (default)
   when: r_custom_repos is defined
   ansible.builtin.blockinfile:
-    mode: "0644"
+    mode: '0644'
     create: true
     path: /etc/Rprofile.site
     block: |

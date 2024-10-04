@@ -8,9 +8,9 @@
     manager: apt
 
 - name: Ensure R-core deps are installed (2)
-  when: "item not in ansible_facts.packages"
+  when: 'item not in ansible_facts.packages'
   ansible.builtin.apt:
-    name: "{{ item }}"
+    name: '{{ item }}'
     state: present
     update_cache: true
   loop:
@@ -58,14 +58,14 @@
     - name: Create diff between lists
       when: any_r_installed.matched | int != 0
       ansible.builtin.set_fact:
-        unwanted_r_versions: "{{ r_installed_list.stdout_lines | difference(r_versions) }}"
+        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_versions) }}'
 
     - name: Remove deprecated/old R versions
       when: r_remove_unused_r_versions | bool and any_r_installed.matched | int != 0
       ansible.builtin.file:
-        path: "/opt/R/{{ item }}"
+        path: '/opt/R/{{ item }}'
         state: absent
-      loop: "{{ unwanted_r_versions }}"
+      loop: '{{ unwanted_r_versions }}'
 
     - name: Set OS identifier for download
       ansible.builtin.set_fact:
@@ -74,48 +74,48 @@
     - name: Download R binary (arm64)
       when: ansible_architecture == 'aarch64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
-        url: "https://devxy-r-builds.s3.eu-central-2.amazonaws.com/{{ os_identifier }}/r-{{ item }}_1_arm64.deb"
-        dest: "/tmp/R-{{ item }}.deb"
+        url: 'https://devxy-r-builds.s3.eu-central-2.amazonaws.com/{{ os_identifier }}/r-{{ item }}_1_arm64.deb'
+        dest: '/tmp/R-{{ item }}.deb'
         force: true
-        mode: "0644"
-      loop: "{{ r_interpreter_versions }}"
+        mode: '0644'
+      loop: '{{ r_interpreter_versions }}'
 
     - name: Download R binary
       when: ansible_architecture == 'x86_64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
-        url: "https://cdn.posit.co/r/ubuntu-{{ os_identifier }}/pkgs/r-{{ item }}_1_amd64.deb"
-        dest: "/tmp/R-{{ item }}.deb"
-        mode: "0644"
-      loop: "{{ r_interpreter_versions }}"
+        url: 'https://cdn.posit.co/r/ubuntu-{{ os_identifier }}/pkgs/r-{{ item }}_1_amd64.deb'
+        dest: '/tmp/R-{{ item }}.deb'
+        mode: '0644'
+      loop: '{{ r_interpreter_versions }}'
 
     # without it, the deb package might be broken if someone manually removed /opt/r-<version>
     - name: Uninstall existing R binaries
       when: not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.apt:
-        name: "r-{{ item }}"
+        name: 'r-{{ item }}'
         state: absent
-      loop: "{{ r_interpreter_versions }}"
+      loop: '{{ r_interpreter_versions }}'
 
     - name: Install R binary
       when: not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.apt:
-        deb: "/tmp/R-{{ item }}.deb"
+        deb: '/tmp/R-{{ item }}.deb'
         force: true
         state: present
-      loop: "{{ r_interpreter_versions }}"
+      loop: '{{ r_interpreter_versions }}'
 
     - name: Cleanup downloaded assets
       when: not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.file:
-        path: "/tmp/R-{{ item }}.deb"
+        path: '/tmp/R-{{ item }}.deb'
         state: absent
-      loop: "{{ r_interpreter_versions }}"
+      loop: '{{ r_interpreter_versions }}'
 
 - name: Install R from tarball
   when: not r_interpreter_install_binary | bool
   block:
     - ansible.builtin.debug:
-        msg: "Installing R from source using local tarballs in {{ r_interpreter_source_path }}"
+        msg: 'Installing R from source using local tarballs in {{ r_interpreter_source_path }}'
     - name: List all installed R versions (source)
       ansible.builtin.shell: ls /opt/R | grep "[0-9]\\.[0-9]\\.[0-9]"
       register: r_installed_list
@@ -128,12 +128,12 @@
     - name: Create diff between lists (source)
       when: any_r_installed.matched | int != 0
       ansible.builtin.set_fact:
-        unwanted_r_versions: "{{ r_installed_list.stdout_lines | difference(r_versions) }}"
+        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_versions) }}'
 
     - name: Ensure required system dependencies are installed (source)
-      when: "item not in ansible_facts.packages"
+      when: 'item not in ansible_facts.packages'
       ansible.builtin.apt:
-        name: "{{ item }}"
+        name: '{{ item }}'
         state: present
       loop:
         - curl
@@ -160,7 +160,7 @@
         make install
         cd ..
         rm -rf "R-{{ item }}"
-      loop: "{{ r_interpreter_versions }}"
+      loop: '{{ r_interpreter_versions }}'
 
 - name: Configure /etc/Rprofile.site (default, Ubuntu)
   when: r_custom_repos is undefined

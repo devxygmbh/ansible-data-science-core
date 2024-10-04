@@ -49,23 +49,23 @@
     - name: Create diff between lists
       when: any_r_installed.matched | int != 0
       ansible.builtin.set_fact:
-        unwanted_r_versions: "{{ r_installed_list.stdout_lines | difference(r_versions) }}"
+        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_versions) }}'
 
     - name: Remove deprecated/old R versions
       when: r_remove_unused_r_versions | bool and any_r_installed.matched | int != 0
       ansible.builtin.dnf:
-        name: "R-{{ item }}.{{ ansible_architecture }}"
+        name: 'R-{{ item }}.{{ ansible_architecture }}'
         state: absent
-      loop: "{{ unwanted_r_versions }}"
+      loop: '{{ unwanted_r_versions }}'
 
     - name: Download R binary (arm64)
       when: r_interpreter_install_binary | bool and ansible_architecture == 'aarch64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
-        url: "https://devxy-r-builds.s3.eu-central-2.amazonaws.com/el{{ ansible_distribution_major_version }}/R-{{ item }}-1-1.aarch64.rpm"
-        dest: "/tmp/R-{{ item }}.rpm"
+        url: 'https://devxy-r-builds.s3.eu-central-2.amazonaws.com/el{{ ansible_distribution_major_version }}/R-{{ item }}-1-1.aarch64.rpm'
+        dest: '/tmp/R-{{ item }}.rpm'
         force: true
-        mode: "0644"
-      loop: "{{ r_interpreter_versions }}"
+        mode: '0644'
+      loop: '{{ r_interpreter_versions }}'
 
     - name: Set Posit OS identifier for download
       when: r_interpreter_install_binary | bool
@@ -75,32 +75,32 @@
     - name: Download R binary
       when: r_interpreter_install_binary | bool and ansible_architecture == 'x86_64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
-        url: "https://cdn.posit.co/r/{{ posit_os_identifier }}-{{ ansible_distribution_major_version }}/pkgs/R-{{ item }}-1-1.x86_64.rpm"
-        dest: "/tmp/R-{{ item }}.rpm"
-        mode: "0644"
-      loop: "{{ r_interpreter_versions }}"
+        url: 'https://cdn.posit.co/r/{{ posit_os_identifier }}-{{ ansible_distribution_major_version }}/pkgs/R-{{ item }}-1-1.x86_64.rpm'
+        dest: '/tmp/R-{{ item }}.rpm'
+        mode: '0644'
+      loop: '{{ r_interpreter_versions }}'
 
     - name: Uninstall existing R binaries
       when: r_interpreter_install_binary | bool and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.dnf:
-        name: "r-{{ item }}"
+        name: 'r-{{ item }}'
         state: absent
-      loop: "{{ r_interpreter_versions }}"
+      loop: '{{ r_interpreter_versions }}'
 
     - name: Install R binary
       when: r_interpreter_install_binary | bool and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.dnf:
-        name: "/tmp/R-{{ item }}.rpm"
+        name: '/tmp/R-{{ item }}.rpm'
         state: present
         disable_gpg_check: true
-      loop: "{{ r_interpreter_versions }}"
+      loop: '{{ r_interpreter_versions }}'
 
     - name: Cleanup downloaded assets
       when: r_interpreter_install_binary | bool and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.file:
-        path: "/tmp/R-{{ item }}.rpm"
+        path: '/tmp/R-{{ item }}.rpm'
         state: absent
-      loop: "{{ r_interpreter_versions }}"
+      loop: '{{ r_interpreter_versions }}'
 
 - name: Install R from tarball
   when: not r_interpreter_install_binary | bool
@@ -117,12 +117,12 @@
     - name: Create diff between lists
       when: any_r_installed.matched | int != 0
       ansible.builtin.set_fact:
-        unwanted_r_versions: "{{ r_installed_list.stdout_lines | difference(r_versions) }}"
+        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_versions) }}'
 
     - name: Ensure required system dependencies are installed
-      when: "item not in ansible_facts.packages"
+      when: 'item not in ansible_facts.packages'
       ansible.builtin.dnf:
-        name: "{{ item }}"
+        name: '{{ item }}'
         state: present
       loop:
         - ccache
@@ -149,7 +149,7 @@
         make install
         cd ..
         rm -rf "R-{{ item }}.tar.gz" "R-{{ item }}"
-      loop: "{{ r_interpreter_versions }}"
+      loop: '{{ r_interpreter_versions }}'
 
 - name: Configure /etc/Rprofile.site (default)
   when: r_custom_repos is undefined

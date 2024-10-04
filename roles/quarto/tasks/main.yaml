@@ -9,7 +9,7 @@
     url: https://api.github.com/repos/quarto-dev/quarto-cli/releases/latest
     return_content: true
     headers:
-      Accept: "application/vnd.github.v3+json"
+      Accept: 'application/vnd.github.v3+json'
   register: latest_release
 
 - name: Infer latest release Quarto version
@@ -24,7 +24,7 @@
     url: https://api.github.com/repos/quarto-dev/quarto-cli/releases
     return_content: true
     headers:
-      Accept: "application/vnd.github.v3+json"
+      Accept: 'application/vnd.github.v3+json'
   register: all_releases
 
 - name: Infer latest pre-release Quarto version
@@ -35,12 +35,12 @@
 - name: Combine quarto versions into a list (release + pre-release)
   when: quarto_custom_download_url is not defined and 'pre-release' in quarto_versions and "'release' in quarto_versions"
   ansible.builtin.set_fact:
-    quarto_versions: "{{ [quarto_release_version, quarto_prerelease_version] + (custom_quarto_versions | default([])) }}"
+    quarto_versions: '{{ [quarto_release_version, quarto_prerelease_version] + (custom_quarto_versions | default([])) }}'
 
 - name: Combine quarto versions into a list (release + custom)
   when: quarto_custom_download_url is not defined and "'release' in quarto_versions"
   ansible.builtin.set_fact:
-    quarto_versions: "{{ [quarto_release_version] + (custom_quarto_versions | default([])) }}"
+    quarto_versions: '{{ [quarto_release_version] + (custom_quarto_versions | default([])) }}'
 
 - name: Define environment facts
   ansible.builtin.set_fact:
@@ -49,46 +49,46 @@
 - name: Download quarto binary (GitHub)
   when: quarto_custom_download_url is not defined
   ansible.builtin.get_url:
-    url: "https://github.com/quarto-dev/quarto-cli/releases/download/v{{ item }}/quarto-{{ item }}-linux-{{ arch }}.tar.gz"
-    dest: "/tmp/quarto-{{ item }}.tar.gz"
-    mode: "0644"
-  loop: "{{ quarto_versions }}"
+    url: 'https://github.com/quarto-dev/quarto-cli/releases/download/v{{ item }}/quarto-{{ item }}-linux-{{ arch }}.tar.gz'
+    dest: '/tmp/quarto-{{ item }}.tar.gz'
+    mode: '0644'
+  loop: '{{ quarto_versions }}'
 
 - name: Download quarto binary (Local)
   when: quarto_custom_download_url is defined and quarto_local_tarball_path is not defined
   ansible.builtin.get_url:
-    url: "{{ quarto_custom_download_url }}/quarto-{{ item }}-linux-{{ arch }}.tar.gz"
-    dest: "/tmp/quarto-{{ item }}.tar.gz"
-    mode: "0644"
-  loop: "{{ quarto_versions }}"
+    url: '{{ quarto_custom_download_url }}/quarto-{{ item }}-linux-{{ arch }}.tar.gz'
+    dest: '/tmp/quarto-{{ item }}.tar.gz'
+    mode: '0644'
+  loop: '{{ quarto_versions }}'
 
 - name: Copy local tarballs to /tmp
   when: quarto_local_tarball_path is defined
   ansible.builtin.copy:
-    src: "quarto-{{ item }}-linux-{{ arch }}.tar.gz"
-    dest: "/tmp/quarto-{{ item }}.tar.gz"
+    src: 'quarto-{{ item }}-linux-{{ arch }}.tar.gz'
+    dest: '/tmp/quarto-{{ item }}.tar.gz'
     remote_src: true
-    mode: "0755"
-  loop: "{{ quarto_versions }}"
+    mode: '0755'
+  loop: '{{ quarto_versions }}'
 
 - name: Ensure quarto directory exists
   ansible.builtin.file:
-    path: "{{ quarto_installation_dir }}"
+    path: '{{ quarto_installation_dir }}'
     state: directory
-    mode: "0755"
+    mode: '0755'
 
 - name: Extract quarto binary
   ansible.builtin.unarchive:
-    src: "/tmp/quarto-{{ item }}.tar.gz"
-    dest: "{{ quarto_installation_dir }}"
+    src: '/tmp/quarto-{{ item }}.tar.gz'
+    dest: '{{ quarto_installation_dir }}'
     remote_src: true
-  loop: "{{ quarto_versions }}"
+  loop: '{{ quarto_versions }}'
 
 - name: Cleanup downloaded assets
   ansible.builtin.file:
-    path: "/tmp/quarto-{{ item }}.tar.gz"
+    path: '/tmp/quarto-{{ item }}.tar.gz'
     state: absent
-  loop: "{{ quarto_versions }}"
+  loop: '{{ quarto_versions }}'
 
 - name: Add quarto to PATH
   when: quarto_add_to_path | bool
@@ -98,5 +98,5 @@
       export PATH={{ quarto_installation_dir }}/quarto-{{ quarto_versions | first }}/bin:$PATH
     create: true
     state: present
-    marker: "# {mark} ANSIBLE MANAGED BLOCK quarto"
-    mode: "0644"
+    marker: '# {mark} ANSIBLE MANAGED BLOCK quarto'
+    mode: '0644'

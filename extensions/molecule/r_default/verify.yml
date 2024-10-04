@@ -6,8 +6,8 @@
   tasks:
     - name: Find all R executables under /opt/R
       ansible.builtin.find:
-        paths: "/opt/R"
-        patterns: "R"
+        paths: '/opt/R'
+        patterns: 'R'
         file_type: file
         recurse: true
         use_regex: false
@@ -15,8 +15,8 @@
 
     - name: Gather file stats for each R executable
       ansible.builtin.stat:
-        path: "{{ item.path }}"
-      loop: "{{ r_installed.files }}"
+        path: '{{ item.path }}'
+      loop: '{{ r_installed.files }}'
       register: r_files_stats
 
     - name: Assert R binaries are executable
@@ -25,6 +25,6 @@
           - item.stat.exists
           - item.stat.isreg
           - item.stat.executable
-        msg: "R binary at {{ item.stat.path }} is not executable"
-      loop: "{{ r_files_stats.results }}"
+        msg: 'R binary at {{ item.stat.path }} is not executable'
+      loop: '{{ r_files_stats.results }}'
       when: item.stat.exists

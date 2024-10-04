@@ -27,15 +27,16 @@ your role description
 
 ## Default Variables
 
-| Variable | Default | Description | Type |
-| -------- | ------- | ----------- | ---- |
-| `quarto_add_to_path` | `true` | Whether to add the executables to $PATH (bash)| `boolean`
+| Variable             | Default | Description                                    | Type      |
+| -------------------- | ------- | ---------------------------------------------- | --------- |
+| `quarto_add_to_path` | `true`  | Whether to add the executables to $PATH (bash) | `boolean` |
+
 |
-| `quarto_custom_download_url` |  | URL for local download. Cannot be combined with dynamic release IDs like 'release'. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.| `string`
+| `quarto_custom_download_url` | | URL for local download. Cannot be combined with dynamic release IDs like 'release'. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.| `string`
 |
 | `quarto_installation_dir` | `/opt/quarto` | The directory in which to install Quarto| `string`
 |
-| `quarto_local_tarball_path` |  | Local path to Quarto tarballs. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.| `string`
+| `quarto_local_tarball_path` | | Local path to Quarto tarballs. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.| `string`
 |
 | `quarto_versions` | `['release']` | | `list`
 |
@@ -43,8 +44,6 @@ your role description
 ## Requirements
 
 - Minimum Ansible version: `2.1`
-
-
 
 ## Dependencies
 
