@@ -30,7 +30,6 @@ Installs and configures R in an opinionated way:
 - 22.04 (Jammy)
 - 24.04 (Noble)
 
-
 ## Default Variables
 
 | Variable | Default | Description | Type |
