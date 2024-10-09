@@ -5,9 +5,10 @@ include_toc: true
 
 # Ansible role to install R
 
-Installs and configures R in an opinionated way:
+✨️ Highlights
 
-- All versions live at `/opt/R`
+- Uses prebuilt R interpreter binaries by default
+- Supports installing R from local source tarballs (for air-gapped environments)
 - For every R version, global `Renviron.site` (`/etc/Renviron.site`) and `Rprofile.site` (`/etc/Rprofile.site`) are configured by default
 - Supports removing R versions not listed in variable `r_versions`
 

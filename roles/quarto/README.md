@@ -9,8 +9,8 @@ include_toc: true
 
 - Supports installing multiple versions alongside each other
 - Allows specifying SemVer versions and dynamic identifiers (`release`, `pre_release`)
-- Supports referencing intern URLs for download
-- Supports referencing local tarballs for offline installation
+- Supports referencing custom URLs for download
+- Supports referencing local tarballs for airgapped environments
 - Adds all executables to $PATH (`bash`)
 
 ## Outbound Connectivity
@@ -27,13 +27,13 @@ your role description
 
 ## Default Variables
 
-| Variable                     | Default       | Description                                                                                                                                                        | Type      |
-| ---------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
-| `quarto_add_to_path`         | `true`        | Whether to add the executables to $PATH (bash)                                                                                                                     | `boolean` |
-| `quarto_custom_download_url` |               | URL for local download. Cannot be combined with dynamic release IDs like 'release'. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`. | `string`  |
-| `quarto_installation_dir`    | `/opt/quarto` | The directory in which to install Quarto                                                                                                                           | `string`  |
-| `quarto_local_tarball_path`  |               | Local path to Quarto tarballs. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.                                                      | `string`  |
-| `quarto_versions`            | `['release']` |                                                                                                                                                                    | `list`    |
+| Variable | Default | Description | Type |
+| -------- | ------- | ----------- | ---- |
+| `quarto_add_to_path` | `true` | Whether to add the executables to $PATH (bash)| `boolean` |
+| `quarto_custom_download_url` |  | URL for local download. Cannot be combined with dynamic release IDs like 'release'. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.| `string` |
+| `quarto_installation_dir` | `/opt/quarto` | The directory in which to install Quarto| `string` |
+| `quarto_local_tarball_path` |  | Local path to Quarto tarballs. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.| `string` |
+| `quarto_versions` | `['release']` | | `list` |
 
 ## Requirements
 

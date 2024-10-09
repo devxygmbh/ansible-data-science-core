@@ -9,8 +9,8 @@ include_toc: true
 
 - Supports installing multiple versions alongside each other
 - Allows specifying SemVer versions and dynamic identifiers (`release`, `pre_release`)
-- Supports referencing intern URLs for download
-- Supports referencing local tarballs for offline installation
+- Supports referencing custom URLs for download
+- Supports referencing local tarballs for airgapped environments
 - Adds all executables to $PATH (`bash`)
 
 ## Outbound Connectivity

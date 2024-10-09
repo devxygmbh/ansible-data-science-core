@@ -1,20 +1,20 @@
 - name: "'Remove mode': Check for Python versions to be removed"
-  when: python_remove_versions | bool
+  when: python_remove_unused_python_versions | bool
   set_fact:
     python_minor_installed: "{{ python_version_list | map('regex_replace', '\\.[0-9]+$') | list }}"
 
 - name: "'Remove mode': Calculate difference between installed and wanted Python versions"
-  when: python_remove_versions | bool
+  when: python_remove_unused_python_versions | bool
   set_fact:
-    difference: "{{ python_minor_installed | difference(python_python_versions) }}"
+    difference: '{{ python_minor_installed | difference(python_interpreter_versions) }}'
 
 - name: "'Remove mode': Print difference between installed and wanted Python versions"
   debug:
-    msg: "{{ difference }}"
+    msg: '{{ difference }}'
 
 - name: "'Remove mode': Remove unwanted Python versions"
-  when: difference | length > 0 and python_remove_versions | bool
+  when: difference | length > 0 and python_remove_unused_python_versions | bool
   ansible.builtin.file:
-    path: "/opt/python/{{ item }}"
+    path: '/opt/python/{{ item }}'
     state: absent
-  loop: "{{ difference }}"
+  loop: '{{ difference }}'
