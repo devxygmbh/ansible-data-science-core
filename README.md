@@ -2,7 +2,7 @@
 
 [![status-badge](https://ci.devxy.io/api/badges/9/status.svg)](https://ci.devxy.io/repos/9)
 
-This Ansible collection contains various roles to install Data Science related tools.
+Collection to install Data Science related tools.
 
 ## Installation
 
@@ -12,11 +12,15 @@ ansible-galaxy collection install devxy.data_science_core
 
 ## Documentation
 
-Refer to the README.md files within each individual role:
+Refer to the `README.md` files within each individual role:
 
 - [R](roles/r/README.md)
 - [Python](roles/python/README.md)
 - [Quarto](roles/quarto/README.md)
+
+## Testing
+
+All roles are tested via `molecule` using various test scenarios (defined in `extensions/molecule/`).
 
 ## Developing
 
