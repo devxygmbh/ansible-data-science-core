@@ -1,5 +1,15 @@
 - name: "'Update mode': Query latest python release for respective minor versions from conda"
   block:
+    - name: "'Update mode': Print Installed Python versions"
+      ansible.builtin.debug:
+        msg: '{{ python_version_list }}'
+
+    - name: "'Update mode': Get list of installed Python directories"
+      ansible.builtin.find:
+        paths: /opt/python
+        file_type: directory
+        excludes: miniconda
+      register: python_dirs
     - name: "'Update mode': Get latest available Python versions using conda search"
       ansible.builtin.command: '/opt/python/miniconda/bin/conda search --json python={{ item }}'
       register: conda_search_results
@@ -8,7 +18,7 @@
 
     - name: "'Update mode': Store latest Python version for each Python version in a dictionary"
       set_fact:
-        latest_python_interpreter_versions: "{{ latest_python_interpreter_versions | default({}) | combine({item.item:     (item.stdout | from_json)['python'] | map(attribute='version') | list | community.general.version_sort | last}) }}"
+        latest_python_interpreter_versions: "{{ latest_python_interpreter_versions | default({}) | combine({item.item: (item.stdout | from_json)['python'] | map(attribute='version') | list | community.general.version_sort | last}) }}"
       loop: '{{ conda_search_results.results }}'
       # output is too verbose
       no_log: true

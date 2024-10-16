@@ -9,6 +9,7 @@ matrix:
   SCENARIO:
     - r_default
     - quarto_default
+    - python_default
     # - r_install_source
 
 steps:

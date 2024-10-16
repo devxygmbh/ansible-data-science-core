@@ -1,5 +1,5 @@
 - name: Destroy molecule containers
-  hosts: molecule
+  hosts: localhost
   gather_facts: false
   tasks:
     - name: Stop and remove container

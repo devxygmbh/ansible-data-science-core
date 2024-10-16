@@ -1,0 +1,30 @@
+- name: Verify
+  hosts: all
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Find all executables under /opt/python
+      ansible.builtin.find:
+        paths: '/opt/python'
+        patterns: 'python3'
+        file_type: link
+        recurse: true
+        use_regex: false
+      register: python_installed
+
+    - name: Gather file stats for each python executable
+      ansible.builtin.stat:
+        path: '{{ item.path }}'
+      loop: '{{ python_installed.files }}'
+      register: python_files_stats
+
+    - name: Assert python binaries are executable
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+          - item.stat.islnk
+        msg: 'python binary at {{ item.stat.path }} is not executable'
+      loop: '{{ python_files_stats.results }}'
+      when: item.stat.exists
+      no_log: true # too verbose
