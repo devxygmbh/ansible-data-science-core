@@ -2,7 +2,10 @@
   hosts: all
   become: true
 
-  # vars:
+  vars:
+    python_interpreter_versions:
+      - '3.11'
+      - '3.12.3'
 
   roles:
     - role: python
