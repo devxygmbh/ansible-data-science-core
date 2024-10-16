@@ -1,3 +1,5 @@
+set shell := ["fish", "-c"]
+
 lint-ansible:
     ansible-lint
 
@@ -59,7 +61,7 @@ start SERVER:
 
 
 ansible-doctor:
-    ansible-doctor roles -r
+    source ~/venv/ansible-ds-core/bin/activate.fish && ansible-doctor roles -r
 
 galaxy-publish:
     ansible-galaxy collection build && \
@@ -73,4 +75,4 @@ init-venv:
     fish -c 'source ~/venv/ansible-ds-core/bin/activate.fish; python3 -m pip install ansible-doctor[ansible-core] "ansible-core<2.17" molecule-plugins[docker] cryptography'
 
 molecule scenario:
-    cd extensions molecule && molecule test --scenario-name {{scenario}}
+    source ~/venv/ansible-ds-core/bin/activate.fish && cd extensions && molecule test --scenario-name {{scenario}}
