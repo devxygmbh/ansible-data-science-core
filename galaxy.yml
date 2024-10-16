@@ -3,7 +3,7 @@ namespace: devxy
 
 name: data_science_core
 
-version: 1.0.0
+version: 1.0.1
 
 readme: README.md
 
@@ -21,13 +21,13 @@ tags: ['tools']
 
 dependencies: {}
 
-repository: https://git.devxy.io/devxy/ansible-ds-core
+repository: https://git.devxy.io/ansible/data_science_core
 
 # The URL to the homepage of the collection/project
 homepage: https://www.devxy.io
 
 # The URL to the collection issue tracker
-issues: https://git.devxy.io/devxy/ansible-ds-core/issues
+issues: https://git.devxy.io/ansible/data_science_core/issues
 
 # A list of file glob-like patterns used to filter any files or directories that should not be included in the build
 # artifact. A pattern is matched from the relative path of the file or directory of the collection directory. This

@@ -1,6 +1,6 @@
 galaxy_info:
   author: Patrick Schratz
-  description: ''
+  description: 'Installs Quarto <https://quarto.org/>'
   company: devXY GmbH
   issue_tracker_url: https://git.devxy.io/ansible/ansible-ds-core/issues
 
@@ -15,7 +15,6 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - 'all'
-
   galaxy_tags:
     - quarto
     - datascience

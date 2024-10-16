@@ -65,9 +65,9 @@ ansible-doctor:
 
 galaxy-publish:
     ansible-galaxy collection build && \
-    tarball=$(ls | grep devxy-) && \
+    set tarball (ls | grep devxy-) && \
     ansible-galaxy collection install $tarball -p /Users/pjs/.ansible/collections && \
-    ansible-galaxy collection publish $tarball && \
+    ansible-galaxy collection publish --token $GALAXY_TOKEN $tarball && \
     rm $tarball
 
 init-venv:

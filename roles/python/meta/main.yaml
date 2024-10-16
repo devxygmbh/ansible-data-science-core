@@ -1,8 +1,8 @@
 galaxy_info:
   author: Patrick Schratz
-  description: ''
+  description: 'Installs Python'
   company: devXY GmbH
-  issue_tracker_url: https://git.devxy.io/ansible/ansible-ds-core/issues
+  issue_tracker_url: https://git.devxy.io/ansible/data_science_core/issues
 
   license: AGPL-3.0-or-later
 
