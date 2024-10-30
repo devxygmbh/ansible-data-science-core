@@ -50,7 +50,7 @@ steps:
     secrets: [API_RW_TOKEN]
     commands:
       - echo $API_RW_TOKEN | glab auth login --stdin
-      - glab release create "${CI_COMMIT_TAG#v}" -F CHANGELOG.md
+      - glab release create "${CI_COMMIT_TAG}" -F CHANGELOG.md
     when:
       event: [tag]
       branch: ${CI_REPO_DEFAULT_BRANCH}
