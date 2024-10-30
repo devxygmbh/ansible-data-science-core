@@ -28,7 +28,7 @@ This results in static versions that will not be altered unless they are removed
 
 Any
 
-your role description
+Installs Python
 
 ## Default Variables
 
@@ -40,7 +40,7 @@ your role description
 
 ## Requirements
 
-- Minimum Ansible version: `2.1`
+- Minimum Ansible version: `2.9`
 
 ## Dependencies
 
@@ -48,8 +48,8 @@ None.
 
 ## License
 
-license (GPL-2.0-or-later, MIT, etc)
+AGPL-3.0-or-later
 
 ## Author
 
-your name
+Patrick Schratz
