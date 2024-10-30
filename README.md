@@ -1,6 +1,6 @@
 # Ansible Data Science Core
 
-[![status-badge](https://ci.devxy.io/api/badges/9/status.svg)](https://ci.devxy.io/repos/9)
+[![status-badge](https://ci.gitlab.devxy.io/api/badges/7/status.svg)](https://ci.gitlab.devxy.io/repos/7)
 
 Collection to install Data Science related tools.
 
@@ -14,9 +14,9 @@ ansible-galaxy collection install devxy.data_science_core
 
 Refer to the `README.md` files within each individual role:
 
-- [R](roles/r/README.md)
-- [Python](roles/python/README.md)
-- [Quarto](roles/quarto/README.md)
+- [R](https://gitlab.com/devxy/ansible/data_science_core/-/blob/main/roles/r/README.md)
+- [Python](https://gitlab.com/devxy/ansible/data_science_core/-/blob/main/roles/python/README.md)
+- [Quarto](https://gitlab.com/devxy/ansible/data_science_core/-/blob/main/roles/quarto/README.md)
 
 ## Testing
 
