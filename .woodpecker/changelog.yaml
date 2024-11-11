@@ -11,7 +11,7 @@ when:
 steps:
   - name: 'Upcoming Changelog'
     secrets: [API_RW_TOKEN]
-    image: docker.io/thegeeklab/git-sv:1.0.6
+    image: docker.io/thegeeklab/git-sv:1.0.7
     commands: |
       chown -R root .
       apk add -q --no-cache curl jq sed
