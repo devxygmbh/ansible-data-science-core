@@ -10,7 +10,9 @@ when:
 
 steps:
   - name: 'Upcoming Changelog'
-    secrets: [API_RW_TOKEN]
+    environment:
+      API_RW_TOKEN:
+        from_secret: API_RW_TOKEN
     image: docker.io/thegeeklab/git-sv:1.0.7
     commands: |
       chown -R root .
