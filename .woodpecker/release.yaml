@@ -12,7 +12,9 @@ depends_on:
 
 steps:
   release-collection:
-    secrets: [GALAXY_TOKEN]
+    environment:
+      GALAXY_TOKEN:
+        from_secret: GALAXY_TOKEN
     image: alpine/ansible:2.17.0
     commands:
       - ansible-galaxy collection build
@@ -47,7 +49,9 @@ steps:
 
   create_release:
     image: 'gitlab/glab:v1.49.0'
-    secrets: [API_RW_TOKEN]
+    environment:
+      API_RW_TOKEN:
+        from_secret: API_RW_TOKEN
     commands:
       - echo $API_RW_TOKEN | glab auth login --stdin
       - glab release create "${CI_COMMIT_TAG}" -F CHANGELOG.md
