@@ -68,7 +68,7 @@
 
 - name: 'Get Python version for each existing installation'
   when: (python_remove_unused_python_versions | bool or python_update_versions | bool) and (python_dirs.matched != 0)
-  ansible.builtin.shell: '{{ item.path }}/bin/python --version'
+  ansible.builtin.command: '{{ item.path }}/bin/python --version'
   register: python_interpreter_versions_existing_installations
   loop: '{{ python_dirs.files }}'
   changed_when: false

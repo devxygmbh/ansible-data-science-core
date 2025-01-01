@@ -114,7 +114,8 @@
 - name: Install R from tarball
   when: not r_interpreter_install_binary | bool
   block:
-    - ansible.builtin.debug:
+    - name: Message
+      ansible.builtin.debug:
         msg: 'Installing R from source using local tarballs in {{ r_interpreter_source_path }}'
     - name: List all installed R versions (source)
       ansible.builtin.shell: ls /opt/R | grep "[0-9]\\.[0-9]\\.[0-9]"
@@ -167,6 +168,7 @@
   ansible.builtin.blockinfile:
     create: true
     path: /etc/Rprofile.site
+    mode: '0644'
     block: |
       options(install.packages.check.source = 'no',
         repos = c(CRAN = "https://packagemanager.posit.co/cran/__linux__/{{ ansible_distribution_release }}/latest"))
