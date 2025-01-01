@@ -34,7 +34,7 @@ Installs Python
 
 | Variable                               | Default            | Description                                                                                                    | Type      |
 | -------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------- | --------- |
-| `python_interpreter_versions`          | `['3.12', '3.13']` |                                                                                                                | `list`    |
+| `python_interpreter_versions`          | `["3.12", "3.13"]` |                                                                                                                | `list`    |
 | `python_remove_unused_python_versions` | `true`             | Whether to remove python versions not listed in `python_interpreter_versions`                                  | `boolean` |
 | `python_update_versions`               | `true`             | If true, automatically updates the minor versions in `python_interpreter_versions` to the latest patch version | `boolean` |
 

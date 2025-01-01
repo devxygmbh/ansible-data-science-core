@@ -1,7 +1,4 @@
----
-gitea: none
-include_toc: true
----
+[[_TOC_]]
 
 # Ansible role to install Quarto
 
