@@ -10,6 +10,8 @@ Collection to install Data Science related tools.
 ansible-galaxy collection install devxy.data_science_core
 ```
 
+→ [Ansible Galaxy](https://galaxy.ansible.com/ui/repo/published/devxy/data_science_core/)
+
 ## Documentation
 
 Refer to the `README.md` files within each individual role:
