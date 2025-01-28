@@ -158,5 +158,6 @@
     path: /etc/Rprofile.site
     mode: '0644'
     block: |
-      options(install.packages.check.source = 'no',
-        repos = 'c(CRAN = "https://packagemanager.posit.co/cran/__linux__/{{ posit_os_identifier }}{{ ansible_distribution_major_version }}/latest")')
+      # devxy.data_science_core.r
+      options(install.packages.check.source = "no",
+        repos = structure(c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/{{ posit_os_identifier }}{{ ansible_distribution_major_version }}/latest')))

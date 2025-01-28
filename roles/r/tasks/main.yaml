@@ -45,8 +45,9 @@
     create: true
     path: /etc/Rprofile.site
     block: |
-      options(install.packages.check.source = 'no',
-        repos = 'c({{ r_custom_repos }})')
+      # devxy.data_science_core.r
+      options(install.packages.check.source = "no",
+        repos = structure(c({{ r_custom_repos }})))
 
 - name: Define additional R options
   when: r_additional_options is defined
