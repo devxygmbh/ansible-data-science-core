@@ -7,6 +7,6 @@ steps:
   commitlint:
     when:
       - event: pull_request
-    image: commitlint/commitlint:19.7.1
+    image: commitlint/commitlint:19.8.0
     commands:
       - echo $${CI_COMMIT_MESSAGE} | commitlint
