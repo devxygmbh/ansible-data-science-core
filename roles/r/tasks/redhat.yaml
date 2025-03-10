@@ -61,7 +61,7 @@
     - name: Download R binary (arm64)
       when: r_interpreter_install_binary | bool and ansible_architecture == 'aarch64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
-        url: 'https://devxy-r-builds.s3.eu-central-2.amazonaws.com/el{{ ansible_distribution_major_version }}/R-{{ item }}-1-1.aarch64.rpm'
+        url: 'https://fsn1.your-objectstorage.com/devxy-r-builds/el{{ ansible_distribution_major_version }}/R-{{ item }}-1-1.aarch64.rpm'
         dest: '/tmp/R-{{ item }}.rpm'
         force: true
         mode: '0644'

@@ -14,10 +14,10 @@ include_toc: true
 
 ## Outbound Connectivity
 
-| Purpose                        | URL                                                    |
-| ------------------------------ | ------------------------------------------------------ |
-| Download R interpreter (arm64) | <https://devxy-r-builds.s3.eu-central-2.amazonaws.com> |
-| Download R interpreter (amd64) | <https://cdn.posit.co>                                 |
+| Purpose                        | URL                                                  |
+| ------------------------------ | ---------------------------------------------------- |
+| Download R interpreter (arm64) | <https://fsn1.your-objectstorage.com/devxy-r-builds> |
+| Download R interpreter (amd64) | <https://cdn.posit.co>                               |
 
 ## Supported Platforms
 
@@ -35,15 +35,15 @@ Installs R <https://cran.r-project.org/>
 
 ## Default Variables
 
-| Variable                       | Default                                                  | Description                                                                                                                                                                           | Type      |
-| ------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `r_additional_options`         |                                                          | Additional default R options                                                                                                                                                          | `list`    |
-| `r_custom_repos`               |                                                          | Additional CRAN-like repositories                                                                                                                                                     | `list`    |
-| `r_interpreter_download_url`   | `"https://devxy-r-builds.s3.eu-central-2.amazonaws.com"` |                                                                                                                                                                                       | `string`  |
-| `r_interpreter_install_binary` | `true`                                                   | Set to `false` to install from a source tarball. The tarball must be named `R-<version>.tar.gz`. Also, set `r_interpreter_source_path` to the local path where the tarball is stored. | `boolean` |
-| `r_interpreter_source_path`    |                                                          | Local path to R source tarball                                                                                                                                                        | `string`  |
-| `r_interpreter_versions`       | `["4.0.5", "4.1.3", "4.2.3", "4.3.3"]`                   |                                                                                                                                                                                       | `list`    |
-| `r_remove_unused_r_versions`   | `true`                                                   |                                                                                                                                                                                       | `boolean` |
+| Variable                       | Default                                                | Description                                                                                                                                                                           | Type      |
+| ------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `r_additional_options`         |                                                        | Additional default R options                                                                                                                                                          | `list`    |
+| `r_custom_repos`               |                                                        | Additional CRAN-like repositories                                                                                                                                                     | `list`    |
+| `r_interpreter_download_url`   | `"https://fsn1.your-objectstorage.com/devxy-r-builds"` |                                                                                                                                                                                       | `string`  |
+| `r_interpreter_install_binary` | `true`                                                 | Set to `false` to install from a source tarball. The tarball must be named `R-<version>.tar.gz`. Also, set `r_interpreter_source_path` to the local path where the tarball is stored. | `boolean` |
+| `r_interpreter_source_path`    |                                                        | Local path to R source tarball                                                                                                                                                        | `string`  |
+| `r_interpreter_versions`       | `["4.0.5", "4.1.3", "4.2.3", "4.3.3"]`                 |                                                                                                                                                                                       | `list`    |
+| `r_remove_unused_r_versions`   | `true`                                                 |                                                                                                                                                                                       | `boolean` |
 
 ## Requirements
 

@@ -14,7 +14,7 @@ r_interpreter_versions:
 r_interpreter_install_binary: true
 # @var r_interpreter_download_url:type: string
 # @var r_additional_options:description: Download URL for R interpreter binaries. Inspect the code for expected subpaths of each platform
-r_interpreter_download_url: https://devxy-r-builds.s3.eu-central-2.amazonaws.com
+r_interpreter_download_url: https://fsn1.your-objectstorage.com/devxy-r-builds
 ### Optional vars
 # @var r_custom_repos:description: Additional CRAN-like repositories
 # @var r_custom_repos:type: list

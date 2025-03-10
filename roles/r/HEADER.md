@@ -14,10 +14,10 @@ include_toc: true
 
 ## Outbound Connectivity
 
-| Purpose                        | URL                                                    |
-| ------------------------------ | ------------------------------------------------------ |
-| Download R interpreter (arm64) | <https://devxy-r-builds.s3.eu-central-2.amazonaws.com> |
-| Download R interpreter (amd64) | <https://cdn.posit.co>                                 |
+| Purpose                        | URL                                                  |
+| ------------------------------ | ---------------------------------------------------- |
+| Download R interpreter (arm64) | <https://fsn1.your-objectstorage.com/devxy-r-builds> |
+| Download R interpreter (amd64) | <https://cdn.posit.co>                               |
 
 ## Supported Platforms
 
