@@ -2,7 +2,7 @@ galaxy_info:
   author: Patrick Schratz
   description: 'Installs Quarto <https://quarto.org/>'
   company: devXY GmbH
-  issue_tracker_url: https://gitlab.com/devxy/ansible/data_science_core/issues
+  issue_tracker_url: https://codefloe.com/devxy/data_science_core/issues
 
   license: AGPL-3.0-or-later
 
