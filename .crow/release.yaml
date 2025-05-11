@@ -51,7 +51,7 @@ steps:
   'Push changes to repo':
     image: docker.io/appleboy/drone-git-push:1.1.1
     settings:
-      remote: ssh://git@${CI_REPO_URL}
+      remote: ssh://{$CI_REPO_CLONE_SSH_URL}
       branch: main
       commit: true
       ssh_key:
