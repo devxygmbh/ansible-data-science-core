@@ -112,6 +112,8 @@
     name: ipykernel
     state: present
   loop: '{{ python_interpreter_versions }}'
+  # python dirs might not yet exist in check_mode, causing task to fail
+  when: not ansible_check_mode
 
 - name: Configure kernel in Jupyter
   ansible.builtin.command: /opt/python/{{ item }}/bin/python -m ipykernel install --name py{{ item }} --display-name "Python {{ item }}"
