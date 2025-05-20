@@ -10,6 +10,7 @@
     headers:
       Accept: 'application/vnd.github.v3+json'
   register: latest_release
+  check_mode: false
 
 - name: Infer latest release Quarto version
   when: quarto_custom_download_url is not defined and ('release' in quarto_versions)
@@ -82,6 +83,7 @@
     dest: '{{ quarto_installation_dir }}'
     remote_src: true
   loop: '{{ quarto_versions }}'
+  when: not ansible_check_mode
 
 - name: Cleanup downloaded assets
   ansible.builtin.file:
