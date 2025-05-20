@@ -13,18 +13,18 @@
         use_regex: false
       register: quarto_installed
 
-    - name: Gather file stats for each R executable
+    - name: Gather file stats for each Quarto executable
       ansible.builtin.stat:
         path: '{{ item.path }}'
       loop: '{{ quarto_installed.files }}'
       register: quarto_files_stats
 
-    - name: Assert R binaries are executable
+    - name: Assert Quarto binaries are executable
       ansible.builtin.assert:
         that:
           - item.stat.exists
           - item.stat.isreg
           - item.stat.executable
-        msg: 'R binary at {{ item.stat.path }} is not executable'
+        msg: 'Quarto binary at {{ item.stat.path }} is not executable'
       loop: '{{ quarto_files_stats.results }}'
       when: item.stat.exists

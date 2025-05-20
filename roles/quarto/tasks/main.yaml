@@ -1,10 +1,9 @@
 - name: Store custom quarto versions in extra variable
   ansible.builtin.set_fact:
     custom_quarto_versions: "{{ quarto_versions | reject('search', 'release') | reject('search', 'prerelease') | list }}"
-  when: quarto_versions | reject('search', 'release') | reject('search', 'prerelease') | list | length > 0
 
 - name: Get Quarto latest release from GitHub
-  when: quarto_custom_download_url is not defined and "'release' in quarto_versions"
+  when: quarto_custom_download_url is not defined and ('release' in quarto_versions)
   ansible.builtin.uri:
     url: https://api.github.com/repos/quarto-dev/quarto-cli/releases/latest
     return_content: true
@@ -13,13 +12,13 @@
   register: latest_release
 
 - name: Infer latest release Quarto version
-  when: quarto_custom_download_url is not defined and 'release' in quarto_versions
+  when: quarto_custom_download_url is not defined and ('release' in quarto_versions)
   ansible.builtin.set_fact:
     quarto_release_version: "{{ latest_release.json.tag_name | replace('v', '') }}"
 
 # to infer the pre_release version, we need to query all releases
 - name: Get all Quarto releases from GitHub
-  when: quarto_custom_download_url is not defined and 'pre-release' in quarto_versions
+  when: quarto_custom_download_url is not defined and ('pre-release' in quarto_versions)
   ansible.builtin.uri:
     url: https://api.github.com/repos/quarto-dev/quarto-cli/releases
     return_content: true
@@ -28,17 +27,17 @@
   register: all_releases
 
 - name: Infer latest pre-release Quarto version
-  when: quarto_custom_download_url is not defined and 'pre-release' in quarto_versions
+  when: quarto_custom_download_url is not defined and ('pre-release' in quarto_versions)
   ansible.builtin.set_fact:
     quarto_prerelease_version: "{{ (all_releases.json | selectattr('prerelease', 'equalto', true) | sort(attribute='created_at', reverse=true) | first).tag_name | replace('v', '') }}"
 
 - name: Combine quarto versions into a list (release + pre-release)
-  when: quarto_custom_download_url is not defined and 'pre-release' in quarto_versions and "'release' in quarto_versions"
+  when: quarto_custom_download_url is not defined and ('pre-release' in quarto_versions) and ('release' in quarto_versions) and quarto_release_version is defined and quarto_prerelease_version is defined
   ansible.builtin.set_fact:
     quarto_versions: '{{ [quarto_release_version, quarto_prerelease_version] + (custom_quarto_versions | default([])) }}'
 
 - name: Combine quarto versions into a list (release + custom)
-  when: quarto_custom_download_url is not defined and "'release' in quarto_versions"
+  when: quarto_custom_download_url is not defined and ('release' in quarto_versions) and quarto_release_version is defined
   ansible.builtin.set_fact:
     quarto_versions: '{{ [quarto_release_version] + (custom_quarto_versions | default([])) }}'
 
@@ -95,8 +94,22 @@
   ansible.builtin.blockinfile:
     path: /etc/profile.d/quarto.sh
     block: |
-      export PATH={{ quarto_installation_dir }}/quarto-{{ quarto_versions | first }}/bin:$PATH
+      {% set version_list = [] %}
+      {% for version in quarto_versions %}
+      {% set version_parts = version.split('.') %}
+      {% set _ = version_list.append([version, version_parts | map('int') | list]) %}
+      {% endfor %}
+      {% set sorted_versions = (version_list | sort(attribute=1, reverse=True) | map(attribute=0) | list) %}
+      {% set path_additions = [] %}
+      {% for version in sorted_versions %}
+      {% set _ = path_additions.append(quarto_installation_dir + '/quarto-' + version + '/bin') %}
+      {% endfor %}
+      export PATH={{ path_additions | join(':') }}:$PATH
     create: true
     state: present
     marker: '# {mark} ANSIBLE MANAGED BLOCK quarto'
     mode: '0644'
+
+- name: Use Quarto from new $PATH
+  ansible.builtin.shell: |
+    source /etc/profile.d/quarto.sh

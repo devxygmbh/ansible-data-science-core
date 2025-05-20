@@ -1,0 +1,10 @@
+- name: Converge
+  hosts: all
+  gather_facts: true
+  vars:
+    quarto_versions:
+      - 1.6.43
+      - 1.7.31
+      - 1.5.57
+  roles:
+    - role: quarto

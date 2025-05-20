@@ -1,0 +1,20 @@
+- name: Verify
+  hosts: all
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Get version of first quarto in PATH
+      ansible.builtin.command: 'cat /etc/profile.d/quarto.sh'
+      register: quarto_version
+
+    - name: debug
+      ansible.builtin.debug:
+        msg: '{{ quarto_version.stdout }}'
+
+    - name: Assert that Quarto 1.7 is first in PATH
+      ansible.builtin.assert:
+        that:
+          - "'export PATH=/opt/quarto/quarto-1.7' in quarto_version.stdout"
+        fail_msg: 'Quarto 1.7 is NOT first in PATH! Found: {{ quarto_version.stdout }}'
+        success_msg: 'Quarto 1.7 is first in PATH: {{ quarto_version.stdout }}'
