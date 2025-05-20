@@ -20,10 +20,10 @@ steps:
       - apk add py3-distlib
       # replace version in galaxy.yml
       - "sed -i 's/version: .*/version: ${CI_COMMIT_TAG#v}/' galaxy.yml"
-      # - ansible-galaxy collection build
-      # - export tarball=$(ls | grep devxy-)
-      # - ansible-galaxy collection install $tarball
-      # - ansible-galaxy collection publish --token $GALAXY_TOKEN $tarball
+      - ansible-galaxy collection build
+      - export tarball=$(ls | grep devxy-)
+      - ansible-galaxy collection install $tarball
+      - ansible-galaxy collection publish --token $GALAXY_TOKEN $tarball
 
   changelog:
     image: docker.io/thegeeklab/git-sv:2.0.1
@@ -36,17 +36,17 @@ steps:
     when:
       event: tag
 
-  # 'Create release':
-  #   image: docker.io/woodpeckerci/plugin-release:0.2.5
-  #   settings:
-  #     note: CHANGELOG.md
-  #     api_key:
-  #       from_secret: devxy_bot_token
-  #     files:
-  #       - dist/*.tar.gz
-  #     title: ${CI_COMMIT_TAG}
-  #   when:
-  #     event: tag
+  'Create release':
+    image: docker.io/woodpeckerci/plugin-release:0.2.5
+    settings:
+      note: CHANGELOG.md
+      api_key:
+        from_secret: devxy_bot_token
+      files:
+        - dist/*.tar.gz
+      title: ${CI_COMMIT_TAG}
+    when:
+      event: tag
 
   'Push changes to repo':
     image: docker.io/appleboy/drone-git-push:1.1.1
