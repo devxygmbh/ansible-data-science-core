@@ -19,7 +19,7 @@ matrix:
 
 steps:
   - name: 'Test ${SCENARIO}'
-    image: library/docker:28.2.2-dind-alpine3.21
+    image: library/docker:28.2.2-dind-alpine
     privileged: true
     environment:
       # force output of ANSI colors
