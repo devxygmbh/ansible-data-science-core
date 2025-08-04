@@ -69,5 +69,5 @@ bak/
 node_modules/
 .ansible
 CHANGELOG.md
-roles/
 ansible_collections/
+dep_roles/

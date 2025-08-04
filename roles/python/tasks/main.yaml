@@ -17,6 +17,7 @@
   args:
     creates: /opt/python/miniconda
   when: not miniconda_installed.stat.exists
+  changed_when: true
 
 - name: Create various directories/opt/python directory
   ansible.builtin.file:
@@ -66,7 +67,7 @@
 #     python_dirs: "[]"
 #   when: python_dirs.matched == 0
 
-- name: 'Get Python version for each existing installation'
+- name: Get Python version for each existing installation
   when: (python_remove_unused_python_versions | bool or python_update_versions | bool) and (python_dirs.matched != 0)
   ansible.builtin.command: '{{ item.path }}/bin/python --version'
   register: python_interpreter_versions_existing_installations
@@ -85,8 +86,8 @@
 #   ansible.builtin.set_fact:
 #     python_versions_installed_list: []
 
-- name: 'Store existing Python versions in a list'
-  when: 
+- name: Store existing Python versions in a list
+  when:
     - (python_remove_unused_python_versions | bool or python_update_versions | bool)
     - (python_dirs.matched != 0)
     - python_interpreter_versions_existing_installations is defined
@@ -97,7 +98,7 @@
   # output is too verbose
   no_log: true
 
-- name: Execute 'remove' mode
+- name: Execute remove mode
   when: python_remove_unused_python_versions | bool and (python_dirs.matched != 0)
   ansible.builtin.include_tasks: remove.yaml
 
@@ -122,6 +123,7 @@
 - name: Configure kernel in Jupyter
   ansible.builtin.command: /opt/python/{{ item }}/bin/python -m ipykernel install --name py{{ item }} --display-name "Python {{ item }}"
   loop: '{{ python_interpreter_versions }}'
+  changed_when: true
 
 - name: Remove miniconda installer
   ansible.builtin.file:

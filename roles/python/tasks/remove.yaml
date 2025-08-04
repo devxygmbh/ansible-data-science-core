@@ -1,18 +1,18 @@
-- name: "'Remove mode': Debug - Show variables"
+- name: Remove mode - Debug - Show variables
   ansible.builtin.debug:
-    msg: 
-      - "Installed versions: {{ python_versions_installed_list | default([]) }}"
-      - "Wanted versions: {{ python_interpreter_versions }}"
-      - "Remove unused: {{ python_remove_unused_python_versions }}"
+    msg:
+      - 'Installed versions: {{ python_versions_installed_list | default([]) }}'
+      - 'Wanted versions: {{ python_interpreter_versions }}'
+      - 'Remove unused: {{ python_remove_unused_python_versions }}'
 
-- name: "'Remove mode': Identify Python versions to remove"
+- name: Remove mode - Identify Python versions to remove
   vars:
     # Normalize wanted versions to strings
     wanted_versions_normalized: "{{ python_interpreter_versions | map('string') | list }}"
   ansible.builtin.set_fact:
     python_versions_to_remove: "{{ python_versions_installed_list | default([]) | rejectattr('version', 'match', '^(' + wanted_versions_normalized | join('|') + ')(\\.|$)') | list }}"
 
-- name: "'Remove mode': Display Python versions that will be removed"
+- name: Remove mode - Display Python versions that will be removed
   ansible.builtin.debug:
     msg: >-
       {%- if python_versions_to_remove | length > 0 -%}
@@ -21,11 +21,11 @@
       No Python versions to remove
       {%- endif -%}
 
-- name: "'Remove mode': Remove unwanted Python versions"
+- name: Remove mode - Remove unwanted Python versions
   when: python_versions_to_remove | length > 0
   ansible.builtin.file:
     path: '{{ item.path }}'
     state: absent
   loop: '{{ python_versions_to_remove }}'
   loop_control:
-    label: "{{ item.version }} ({{ item.path }})"
+    label: '{{ item.version }} ({{ item.path }})'

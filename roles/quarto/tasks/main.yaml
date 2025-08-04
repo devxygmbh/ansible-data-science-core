@@ -102,7 +102,7 @@
       {% set version_parts = version.split('.') %}
       {% set _ = version_list.append([version, version_parts | map('int') | list]) %}
       {% endfor %}
-      {% set sorted_versions = (version_list | sort(attribute=1, reverse=True) | map(attribute=0) | list) %}
+      {% set sorted_versions = version_list | sort(attribute=1, reverse=True) | map(attribute=0) | list %}
       {% set path_additions = [] %}
       {% for version in sorted_versions %}
       {% set _ = path_additions.append(quarto_installation_dir + '/quarto-' + version + '/bin') %}
