@@ -107,7 +107,9 @@
 #   ansible.builtin.include_tasks: update.yaml
 
 - name: Install Python versions
-  ansible.builtin.command: '/opt/python/miniconda/bin/conda create --quiet --yes --prefix /opt/python/{{ item }} python={{ item }}'
+  ansible.builtin.command: |
+    /opt/python/miniconda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+    /opt/python/miniconda/bin/conda create --quiet --yes --prefix /opt/python/{{ item }} python={{ item }}
   loop: '{{ python_interpreter_versions }}'
   when: python_interpreter_versions is defined
 
