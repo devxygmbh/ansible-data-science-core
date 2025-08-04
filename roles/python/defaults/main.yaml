@@ -4,8 +4,8 @@
 # string notation is important as otherwise trailing zeros are cut
 # @var python_interpreter_versions:type: list
 python_interpreter_versions:
-  - '3.12'
-  - '3.13'
+  - "3.12"
+  - "3.13"
 
 # @var python_update_versions:description: If true, automatically updates the minor versions in `python_interpreter_versions` to the latest patch version
 # @var python_update_versions:type: boolean

@@ -1,27 +1,31 @@
-- name: "'Remove mode': Calculate difference between installed and wanted Python versions"
-  when: python_remove_unused_python_versions | bool
-  ansible.builtin.set_fact:
-    difference: >-
-      {{
-        python_versions_installed_list | map(attribute='version') | list
-        | difference(python_interpreter_versions)
-      }}
-
-- name: "'Remove mode': Print difference between installed and wanted Python versions"
+- name: "'Remove mode': Debug - Show variables"
   ansible.builtin.debug:
-    msg: '{{ difference }}'
+    msg: 
+      - "Installed versions: {{ python_versions_installed_list | default([]) }}"
+      - "Wanted versions: {{ python_interpreter_versions }}"
+      - "Remove unused: {{ python_remove_unused_python_versions }}"
 
-- name: "'Remove mode': Find paths for versions to be removed"
-  when: difference | length > 0 and python_remove_unused_python_versions | bool
+- name: "'Remove mode': Identify Python versions to remove"
+  vars:
+    # Normalize wanted versions to strings
+    wanted_versions_normalized: "{{ python_interpreter_versions | map('string') | list }}"
   ansible.builtin.set_fact:
-    paths_to_remove: >-
-      {{
-        python_versions_installed_list | selectattr('version', 'in', difference) | map(attribute='path') | list
-      }}
+    python_versions_to_remove: "{{ python_versions_installed_list | default([]) | rejectattr('version', 'match', '^(' + wanted_versions_normalized | join('|') + ')(\\.|$)') | list }}"
+
+- name: "'Remove mode': Display Python versions that will be removed"
+  ansible.builtin.debug:
+    msg: >-
+      {%- if python_versions_to_remove | length > 0 -%}
+      Removing Python versions: {{ python_versions_to_remove | map(attribute='version') | list | join(', ') }}
+      {%- else -%}
+      No Python versions to remove
+      {%- endif -%}
 
 - name: "'Remove mode': Remove unwanted Python versions"
-  when: difference | length > 0 and python_remove_unused_python_versions | bool
+  when: python_versions_to_remove | length > 0
   ansible.builtin.file:
-    path: '{{ item }}'
+    path: '{{ item.path }}'
     state: absent
-  loop: '{{ paths_to_remove }}'
+  loop: '{{ python_versions_to_remove }}'
+  loop_control:
+    label: "{{ item.version }} ({{ item.path }})"

@@ -72,7 +72,7 @@
   register: python_interpreter_versions_existing_installations
   loop: '{{ python_dirs.files }}'
   changed_when: false
-  failed_when: python_interpreter_versions is not defined
+  check_mode: false
 
 # - name: Define 'python_interpreter_versions'
 #   ansible.builtin.set_fact:
@@ -86,10 +86,14 @@
 #     python_versions_installed_list: []
 
 - name: 'Store existing Python versions in a list'
-  when: (python_remove_unused_python_versions | bool or python_update_versions | bool) and (python_dirs.matched != 0)
+  when: 
+    - (python_remove_unused_python_versions | bool or python_update_versions | bool)
+    - (python_dirs.matched != 0)
+    - python_interpreter_versions_existing_installations is defined
+    - not python_interpreter_versions_existing_installations.skipped | default(false)
   ansible.builtin.set_fact:
-    python_versions_installed_list: "{{ (python_versions_installed_list | default([]) + [{'path': item.item.path, 'version': item.stdout | replace('Python ', '')}]) }}"
-  loop: '{{ python_interpreter_versions_existing_installations.results }}'
+    python_versions_installed_list: "{{ (python_versions_installed_list | default([]) + [{'path': item.item.path, 'version': item.stdout | default('') | replace('Python ', '')}]) }}"
+  loop: '{{ python_interpreter_versions_existing_installations.results | default([]) }}'
   # output is too verbose
   no_log: true
 
