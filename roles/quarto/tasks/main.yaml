@@ -89,6 +89,7 @@
   ansible.builtin.file:
     path: '/tmp/quarto-{{ item }}.tar.gz'
     state: absent
+  changed_when: false
   loop: '{{ quarto_versions }}'
 
 - name: Add quarto to PATH

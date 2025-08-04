@@ -1,7 +1,13 @@
+collections:
+  - name: community.general
+    version: 11.1.0
+
 roles:
   - name: nginxinc.nginx
     version: 0.25.0
   - name: nginxinc.nginx_config
     version: 0.7.1
-  - name: geerlingguy.certbot
-    version: 5.4.0
+  - src: https://codefloe.com/devxy/ansible-certbot.git
+    scm: git
+    version: v5.3.0
+    name: devxy.certbot

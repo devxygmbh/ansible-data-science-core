@@ -1,5 +1,8 @@
 set shell := ["fish", "-c"]
 
+ansible-deps:
+  ansible-galaxy install -r requirements.yaml
+
 lint-ansible:
     ansible-lint
 
