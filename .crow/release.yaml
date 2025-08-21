@@ -3,7 +3,7 @@ when:
 
 clone:
   git:
-    image: docker.io/woodpeckerci/plugin-git:2.6.5
+    image: codeberg.org/crow-plugins/clone:1.0.1
     settings:
       tags: true
 
@@ -17,7 +17,7 @@ steps:
         from_secret: GALAXY_TOKEN
     image: alpine/ansible:2.18.6
     commands:
-      - apk add py3-distlib
+      - apk add -q --no-cache py3-distlib
       # replace version in galaxy.yml
       - "sed -i 's/version: .*/version: ${CI_COMMIT_TAG#v}/' galaxy.yml"
       - ansible-galaxy collection build
