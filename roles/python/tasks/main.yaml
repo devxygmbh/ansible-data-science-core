@@ -36,6 +36,7 @@
     create: true
     block: |
       export PATH=/opt/python/{{ item }}/bin:/opt/python/miniconda/bin:$PATH
+      export CONDA_PLUGINS_AUTO_ACCEPT_TOS=true
   loop: '{{ python_interpreter_versions }}'
   # uses the last element of the list
   when: item == python_interpreter_versions[-1]
@@ -108,7 +109,6 @@
 
 - name: Install Python versions
   ansible.builtin.command: |
-    /opt/python/miniconda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
     /opt/python/miniconda/bin/conda create --quiet --yes --prefix /opt/python/{{ item }} python={{ item }}
   loop: '{{ python_interpreter_versions }}'
   when: python_interpreter_versions is defined
