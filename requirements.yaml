@@ -9,5 +9,5 @@ roles:
     version: 0.7.1
   - src: https://codefloe.com/devxy/ansible-certbot.git
     scm: git
-    version: v5.3.0
+    version: 5.4.0
     name: devxy.certbot
