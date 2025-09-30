@@ -172,4 +172,4 @@
     block: |
       # devxy.data_science_core.r
       options(install.packages.check.source = 'no',
-        repos = structure(c(CRAN = "https://packagemanager.posit.co/cran/__linux__/{{ ansible_distribution_release }}/latest")))
+        repos = structure(c(CRAN = "https://p3m.dev/cran/__linux__/{{ ansible_distribution_release }}/latest")))
