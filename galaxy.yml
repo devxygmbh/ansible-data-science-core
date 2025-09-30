@@ -3,7 +3,7 @@ namespace: devxy
 
 name: data_science_core
 
-version: 1.0.6
+version: 1.0.8
 
 readme: README.md
 
