@@ -41,7 +41,7 @@
       - libSM-devel
       - libXt-devel
       - texlive-collection-latexrecommended
-      - java-17-openjdk-devel
+      - java-21-openjdk-devel
       - xz-devel
       - libicu-devel
       - tcl-devel
@@ -53,7 +53,6 @@
       - tk-devel
       - less
       - libdeflate-devel
-      - tre-devel
     state: present
 
 - name: Install build dependencies for R (RHEL 8/9)
