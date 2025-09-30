@@ -107,7 +107,7 @@
     - name: Set Posit OS identifier for download
       when: r_interpreter_install_binary | bool
       ansible.builtin.set_fact:
-        posit_os_identifier: "{{ 'centos' if ansible_distribution_major_version | int == 8 else 'rhel' if ansible_distribution_major_version | int == 9 else 'unsupported' }}"
+        posit_os_identifier: "{{ 'centos' if ansible_distribution_major_version | int == 8 else 'rhel' }}"
 
     - name: Download R binary
       when: r_interpreter_install_binary | bool and ansible_architecture == 'x86_64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
