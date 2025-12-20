@@ -15,7 +15,7 @@ steps:
     environment:
       GALAXY_TOKEN:
         from_secret: GALAXY_TOKEN
-    image: reg.devxy.io/docker.io/alpine/ansible:2.18.6
+    image: reg.devxy.io/docker.io/alpine/ansible:2.20.0
     commands:
       - apk add -q --no-cache py3-distlib
       # replace version in galaxy.yml
