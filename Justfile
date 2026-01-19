@@ -1,3 +1,8 @@
+# Variables
+venv := "~/venv/ansible-data-science-core"
+venv_env := "VIRTUAL_ENV=" + venv + " PATH=" + venv + "/bin:$PATH"
+
+
 set shell := ["fish", "-c"]
 
 ansible-deps:
@@ -73,8 +78,12 @@ galaxy-publish:
     rm $tarball
 
 init-venv:
-    python3 -m venv ~/venv/ansible-ds-core && \
-    fish -c 'source ~/venv/ansible-ds-core/bin/activate.fish; python3 -m pip install --upgrade ansible-doctor[ansible-core] molecule-plugins[docker] cryptography'
+    uv venv --python 3.12 {{ venv }} && \
+    uv pip install --python {{ venv }}/bin/python \
+        ansible-doctor[ansible-core] \
+        molecule-plugins[docker] \
+        cryptography \
+        distlib
 
 molecule scenario:
     source ~/venv/ansible-ds-core/bin/activate.fish && cd extensions && molecule test --scenario-name {{scenario}}
