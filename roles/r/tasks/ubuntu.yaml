@@ -69,10 +69,10 @@
 
     - name: Set OS identifier for download
       ansible.builtin.set_fact:
-        os_identifier: "{{ '2404' if ansible_distribution_version == '24.04' else '2204' if ansible_distribution_version == '22.04' else '2004' if ansible_distribution_version == '20.04' }}"
+        os_identifier: "{{ '2404' if ansible_facts['distribution_version'] == '24.04' else '2204' if ansible_facts['distribution_version'] == '22.04' else '2004' if ansible_facts['distribution_version'] == '20.04' }}"
 
     - name: Download R binary (arm64)
-      when: ansible_architecture == 'aarch64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      when: ansible_facts['architecture'] == 'aarch64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
         url: 'https://fsn1.your-objectstorage.com/devxy-r-builds/{{ os_identifier }}/r-{{ item }}_1_arm64.deb'
         dest: '/tmp/R-{{ item }}.deb'
@@ -81,7 +81,7 @@
       loop: '{{ r_interpreter_versions }}'
 
     - name: Download R binary
-      when: ansible_architecture == 'x86_64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      when: ansible_facts['architecture'] == 'x86_64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
         url: 'https://cdn.posit.co/r/ubuntu-{{ os_identifier }}/pkgs/r-{{ item }}_1_amd64.deb'
         dest: '/tmp/R-{{ item }}.deb'
@@ -172,4 +172,4 @@
     block: |
       # devxy.data_science_core.r
       options(install.packages.check.source = 'no',
-        repos = structure(c(CRAN = "https://p3m.dev/cran/__linux__/{{ ansible_distribution_release }}/latest")))
+        repos = structure(c(CRAN = "https://p3m.dev/cran/__linux__/{{ ansible_facts['distribution_release'] }}/latest")))

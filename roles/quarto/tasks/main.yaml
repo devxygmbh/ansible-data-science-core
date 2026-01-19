@@ -44,7 +44,7 @@
 
 - name: Define environment facts
   ansible.builtin.set_fact:
-    arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}"
+    arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
 
 - name: Download quarto binary (GitHub)
   when: quarto_custom_download_url is not defined

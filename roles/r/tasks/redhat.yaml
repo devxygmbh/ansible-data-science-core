@@ -7,19 +7,19 @@
 # for flexiblas-devel
 - name: Enable appropriate repository for RedHat 8 or 9
   community.general.dnf_config_manager:
-    name: "{{ 'crb' if ansible_distribution_major_version | int == 9 else 'powertools' }}"
+    name: "{{ 'crb' if ansible_facts['distribution_major_version'] | int == 9 else 'powertools' }}"
     state: enabled
-  when: ansible_distribution_major_version | int in [8, 9]
+  when: ansible_facts['distribution_major_version'] | int in [8, 9]
 
 - name: Ensure R-core deps are installed (2)
   when: ansible_facts['os_family'] == 'RedHat'
   ansible.builtin.dnf:
-    name: "{{ 'flexiblas-devel' if ansible_distribution_major_version | int == 9 else 'openblas-devel' }}"
+    name: "{{ 'flexiblas-devel' if ansible_facts['distribution_major_version'] | int == 9 else 'openblas-devel' }}"
     update_cache: true
     state: present
 
 - name: Install build dependencies for R (RHEL 10)
-  when: ansible_facts['os_family'] == 'RedHat' and ansible_distribution_major_version | int == 10
+  when: ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] | int == 10
   ansible.builtin.dnf:
     name:
       - gcc-c++
@@ -56,7 +56,7 @@
     state: present
 
 - name: Install build dependencies for R (RHEL 8/9)
-  when: ansible_facts['os_family'] == 'RedHat' and ansible_distribution_major_version | int in [8, 9]
+  when: ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] | int in [8, 9]
   ansible.builtin.command:
     cmd: 'dnf builddep -y R'
   register: dnf_result
@@ -91,14 +91,14 @@
     - name: Remove deprecated/old R versions
       when: r_remove_unused_r_versions | bool and any_r_installed.matched | int != 0
       ansible.builtin.dnf:
-        name: 'R-{{ item }}.{{ ansible_architecture }}'
+        name: "R-{{ item }}.{{ ansible_facts['architecture'] }}"
         state: absent
       loop: '{{ unwanted_r_versions }}'
 
     - name: Download R binary (arm64)
-      when: r_interpreter_install_binary | bool and ansible_architecture == 'aarch64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      when: r_interpreter_install_binary | bool and ansible_facts['architecture'] == 'aarch64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
-        url: 'https://fsn1.your-objectstorage.com/devxy-r-builds/el{{ ansible_distribution_major_version }}/R-{{ item }}-1-1.aarch64.rpm'
+        url: "https://fsn1.your-objectstorage.com/devxy-r-builds/el{{ ansible_facts['distribution_major_version'] }}/R-{{ item }}-1-1.aarch64.rpm"
         dest: '/tmp/R-{{ item }}.rpm'
         force: true
         mode: '0644'
@@ -107,12 +107,12 @@
     - name: Set Posit OS identifier for download
       when: r_interpreter_install_binary | bool
       ansible.builtin.set_fact:
-        posit_os_identifier: "{{ 'centos' if ansible_distribution_major_version | int == 8 else 'rhel' }}"
+        posit_os_identifier: "{{ 'centos' if ansible_facts['distribution_major_version'] | int == 8 else 'rhel' }}"
 
     - name: Download R binary
-      when: r_interpreter_install_binary | bool and ansible_architecture == 'x86_64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      when: r_interpreter_install_binary | bool and ansible_facts['architecture'] == 'x86_64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
-        url: 'https://cdn.posit.co/r/{{ posit_os_identifier }}-{{ ansible_distribution_major_version }}/pkgs/R-{{ item }}-1-1.x86_64.rpm'
+        url: "https://cdn.posit.co/r/{{ posit_os_identifier }}-{{ ansible_facts['distribution_major_version'] }}/pkgs/R-{{ item }}-1-1.x86_64.rpm"
         dest: '/tmp/R-{{ item }}.rpm'
         mode: '0644'
       loop: '{{ r_interpreter_versions }}'
@@ -197,4 +197,4 @@
     block: |
       # devxy.data_science_core.r
       options(install.packages.check.source = "no",
-        repos = structure(c(CRAN = 'https://p3m.dev/cran/__linux__/{{ posit_os_identifier }}{{ ansible_distribution_major_version }}/latest')))
+        repos = structure(c(CRAN = 'https://p3m.dev/cran/__linux__/{{ posit_os_identifier }}{{ ansible_facts['distribution_major_version'] }}/latest')))
