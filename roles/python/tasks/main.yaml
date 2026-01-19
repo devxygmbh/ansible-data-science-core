@@ -110,6 +110,8 @@
 - name: Install Python versions
   ansible.builtin.command: |
     /opt/python/miniconda/bin/conda create --quiet --yes --prefix /opt/python/{{ item }} python={{ item }}
+  environment:
+    CONDA_PLUGINS_AUTO_ACCEPT_TOS: 'true'
   loop: '{{ python_interpreter_versions }}'
   when: python_interpreter_versions is defined
 

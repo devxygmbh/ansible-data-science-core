@@ -12,6 +12,8 @@
       register: python_dirs
     - name: "'Update mode': Get latest available Python versions using conda search"
       ansible.builtin.command: '/opt/python/miniconda/bin/conda search --json python={{ item }}'
+      environment:
+        CONDA_PLUGINS_AUTO_ACCEPT_TOS: 'true'
       register: conda_search_results
       loop: '{{ python_interpreter_versions }}'
       changed_when: false
