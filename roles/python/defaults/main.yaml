@@ -7,6 +7,14 @@ python_interpreter_versions:
   - '3.12'
   - '3.13'
 
+# @var python_use_ubi_cdn:description: Use Red Hat UBI CDN for Python RPM downloads instead of Miniconda
+# @var python_use_ubi_cdn:type: boolean
+python_use_ubi_cdn: false
+
+# @var python_ubi_cdn_base_url:description: Base URL for UBI CDN (without trailing slash)
+# @var python_ubi_cdn_base_url:type: string
+python_ubi_cdn_base_url: 'https://cdn-ubi.redhat.com/content/public/ubi/dist'
+
 # @var python_update_versions:description: If true, automatically updates the minor versions in `python_interpreter_versions` to the latest patch version
 # @var python_update_versions:type: boolean
 python_update_versions: true

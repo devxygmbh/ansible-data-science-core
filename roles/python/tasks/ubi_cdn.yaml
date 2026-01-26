@@ -1,0 +1,56 @@
+# tasks file for installing Python from UBI CDN
+
+- name: Include version check and resolution tasks
+  ansible.builtin.include_tasks: ubi_check_versions.yaml
+
+- name: Download Python RPMs from UBI CDN
+  ansible.builtin.get_url:
+    url: '{{ python_ubi_packages_url }}{{ item.rpm }}'
+    dest: '/tmp/{{ item.rpm }}'
+    mode: '0644'
+  loop: '{{ python_resolved_versions }}'
+  loop_control:
+    label: '{{ item.rpm }}'
+
+- name: Install Python RPMs
+  ansible.builtin.dnf:
+    name: '/tmp/{{ item.rpm }}'
+    state: present
+    disable_gpg_check: true
+  loop: '{{ python_resolved_versions }}'
+  loop_control:
+    label: '{{ item.rpm }}'
+
+- name: Clean up downloaded RPMs
+  ansible.builtin.file:
+    path: '/tmp/{{ item.rpm }}'
+    state: absent
+  loop: '{{ python_resolved_versions }}'
+  loop_control:
+    label: '{{ item.rpm }}'
+
+- name: Install pip for each Python version
+  ansible.builtin.command: '/usr/bin/python{{ item.minor }} -m ensurepip --upgrade'
+  loop: '{{ python_resolved_versions }}'
+  loop_control:
+    label: 'Python {{ item.resolved }}'
+  register: ensurepip_result
+  changed_when: "'Successfully installed' in ensurepip_result.stdout"
+  failed_when: false
+
+- name: Install ipykernel for use in Jupyter
+  ansible.builtin.pip:
+    executable: '/usr/bin/pip{{ item.minor }}'
+    name: ipykernel
+    state: present
+  loop: '{{ python_resolved_versions }}'
+  loop_control:
+    label: 'Python {{ item.resolved }}'
+  when: not ansible_check_mode
+
+- name: Configure kernel in Jupyter
+  ansible.builtin.command: '/usr/bin/python{{ item.minor }} -m ipykernel install --name py{{ item.minor }} --display-name "Python {{ item.resolved }}"'
+  loop: '{{ python_resolved_versions }}'
+  loop_control:
+    label: 'Python {{ item.resolved }}'
+  changed_when: true

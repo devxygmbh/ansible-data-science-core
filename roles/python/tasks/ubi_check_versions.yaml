@@ -1,0 +1,57 @@
+# tasks file for checking available Python versions in UBI CDN
+
+- name: Build UBI CDN packages URL
+  ansible.builtin.set_fact:
+    python_ubi_packages_url: "{{ python_ubi_cdn_base_url }}/ubi{{ ansible_facts['distribution_major_version'] }}/{{ ansible_facts['distribution_major_version'] }}/{{ ansible_facts['architecture'] }}/appstream/os/Packages/p/"
+
+- name: Determine Python package name pattern based on RHEL version
+  ansible.builtin.set_fact:
+    # RHEL 10+ uses 'python3-3.x.y' pattern, RHEL 8/9 use 'python3.x-3.x.y' pattern
+    python_ubi_is_rhel10_or_later: "{{ ansible_facts['distribution_major_version'] | int >= 10 }}"
+
+- name: Check if all requested versions are direct RPM filenames
+  ansible.builtin.set_fact:
+    python_all_direct_rpms: "{{ python_interpreter_versions | select('search', '\\.rpm$') | list | length == python_interpreter_versions | length }}"
+    python_has_direct_rpms: "{{ python_interpreter_versions | select('search', '\\.rpm$') | list | length > 0 }}"
+
+- name: Display UBI CDN packages URL
+  when: not python_all_direct_rpms
+  ansible.builtin.debug:
+    msg: 'Fetching package listing from: {{ python_ubi_packages_url }}'
+
+- name: Fetch UBI CDN package listing
+  when: not python_all_direct_rpms
+  ansible.builtin.uri:
+    url: '{{ python_ubi_packages_url }}'
+    return_content: true
+  register: ubi_package_listing
+
+- name: Extract available Python RPM filenames
+  when: not python_all_direct_rpms
+  ansible.builtin.set_fact:
+    python_ubi_available_rpms: "{{ ubi_package_listing.content | regex_findall('python3[0-9.]*-3\\.[0-9]+\\.[0-9]+-[^\"]+\\.rpm') | unique }}"
+
+- name: Set empty RPM list when using direct filenames only
+  when: python_all_direct_rpms
+  ansible.builtin.set_fact:
+    python_ubi_available_rpms: []
+
+- name: Display available Python RPMs
+  when: not python_all_direct_rpms
+  ansible.builtin.debug:
+    msg: 'Found {{ python_ubi_available_rpms | length }} Python RPMs in UBI CDN'
+    verbosity: 1
+
+- name: Initialize resolved versions list
+  ansible.builtin.set_fact:
+    python_resolved_versions: []
+
+- name: Resolve versions and validate availability
+  ansible.builtin.include_tasks: ubi_resolve_version.yaml
+  loop: '{{ python_interpreter_versions }}'
+  loop_control:
+    loop_var: requested_version
+
+- name: Display resolved Python versions
+  ansible.builtin.debug:
+    msg: "Resolved versions: {{ python_resolved_versions | map(attribute='requested') | zip(python_resolved_versions | map(attribute='resolved')) | map('join', ' -> ') | list }}"
