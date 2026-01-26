@@ -1,0 +1,79 @@
+# tasks file for resolving a single Python version from UBI CDN
+
+- name: Check if requested version is a direct RPM filename - {{ requested_version }}
+  ansible.builtin.set_fact:
+    version_is_direct_rpm: "{{ requested_version is search('\\.rpm$') }}"
+
+- name: Handle direct RPM filename - {{ requested_version }}
+  when: version_is_direct_rpm
+  block:
+    - name: Extract version info from RPM filename - {{ requested_version }}
+      ansible.builtin.set_fact:
+        resolved_rpm: '{{ requested_version }}'
+        resolved_version: "{{ requested_version | regex_replace('.*-([0-9]+\\.[0-9]+\\.[0-9]+)-.*', '\\1') }}"
+        version_minor: "{{ (requested_version | regex_replace('.*-([0-9]+\\.[0-9]+)\\.[0-9]+-.*', '\\1')) }}"
+
+    - name: Append direct RPM to resolved versions list
+      ansible.builtin.set_fact:
+        python_resolved_versions: "{{ python_resolved_versions | default([]) + [{'requested': requested_version, 'resolved': resolved_version, 'rpm': resolved_rpm, 'minor': version_minor}] }}"
+
+- name: Resolve version from CDN listing - {{ requested_version }}
+  when: not version_is_direct_rpm
+  block:
+    - name: Determine if version is minor-only or full semver - {{ requested_version }}
+      ansible.builtin.set_fact:
+        version_is_minor_only: "{{ requested_version | regex_search('^[0-9]+\\.[0-9]+$') is not none }}"
+        version_minor: "{{ requested_version | regex_replace('^([0-9]+\\.[0-9]+).*', '\\1') }}"
+
+    - name: Build package search pattern - {{ requested_version }}
+      ansible.builtin.set_fact:
+        # RHEL 10+: 'python3-3.x.y' pattern, RHEL 8/9: 'python3.x-3.x.y' pattern
+        package_prefix_pattern: "{{ 'python3-' if python_ubi_is_rhel10_or_later else 'python3\\\\.' + (version_minor | regex_replace('\\\\.', '\\\\\\\\.')) + '-' }}"
+        version_search_pattern: "{{ '' if version_is_minor_only else (requested_version | regex_replace('\\\\.', '\\\\\\\\.')) }}"
+
+    - name: Find matching RPMs - {{ requested_version }}
+      ansible.builtin.set_fact:
+        matching_rpms: >-
+          {{
+            python_ubi_available_rpms
+            | select('search', package_prefix_pattern + (version_minor | regex_replace('\\.', '\\\\.')) if python_ubi_is_rhel10_or_later else package_prefix_pattern + version_search_pattern)
+            | list
+          }}
+
+    - name: Find available versions for error message - {{ requested_version }}
+      when: matching_rpms | length == 0
+      ansible.builtin.set_fact:
+        available_versions_for_minor: >-
+          {{
+            python_ubi_available_rpms
+            | select('search', package_prefix_pattern)
+            | map('regex_replace', '.*-([0-9]+\\.[0-9]+\\.[0-9]+)-.*', '\\1')
+            | select('match', '^' + (version_minor | regex_replace('\\.', '\\\\.')) + '\\.')
+            | unique
+            | sort
+            | join(', ')
+            | default('none', true)
+          }}
+
+    - name: Fail if no matching version found - {{ requested_version }}
+      when: matching_rpms | length == 0
+      ansible.builtin.fail:
+        msg: >-
+          Python {{ requested_version }} is not available in UBI CDN for RHEL {{ ansible_facts['distribution_major_version'] }}.
+          Available {{ version_minor }}.x versions: {{ available_versions_for_minor }}
+
+    - name: Resolve latest patch version - {{ requested_version }}
+      when: version_is_minor_only
+      ansible.builtin.set_fact:
+        resolved_rpm: '{{ matching_rpms | community.general.version_sort | last }}'
+        resolved_version: "{{ (matching_rpms | community.general.version_sort | last) | regex_replace('.*-([0-9]+\\.[0-9]+\\.[0-9]+)-.*', '\\1') }}"
+
+    - name: Use exact version - {{ requested_version }}
+      when: not version_is_minor_only
+      ansible.builtin.set_fact:
+        resolved_rpm: '{{ matching_rpms | first }}'
+        resolved_version: '{{ requested_version }}'
+
+    - name: Append resolved version to list
+      ansible.builtin.set_fact:
+        python_resolved_versions: "{{ python_resolved_versions | default([]) + [{'requested': requested_version, 'resolved': resolved_version, 'rpm': resolved_rpm, 'minor': version_minor}] }}"
