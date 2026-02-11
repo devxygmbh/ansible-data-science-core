@@ -6,6 +6,7 @@
 python_interpreter_versions:
   - '3.12'
   - '3.13'
+  - '3.14'
 
 # @var python_use_ubi_cdn:description: Use Red Hat UBI CDN for Python RPM downloads instead of uv
 # @var python_use_ubi_cdn:type: boolean
