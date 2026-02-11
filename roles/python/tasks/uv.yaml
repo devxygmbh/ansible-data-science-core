@@ -1,0 +1,180 @@
+# tasks file for installing Python via uv
+
+- name: Check if uv is already installed
+  ansible.builtin.stat:
+    path: '{{ python_uv_install_dir }}/uv'
+  register: uv_binary
+
+- name: Install uv binary
+  when: not uv_binary.stat.exists and not ansible_check_mode
+  block:
+    - name: Set uv architecture mapping
+      ansible.builtin.set_fact:
+        uv_arch: "{{ (ansible_facts['architecture'] == 'x86_64') | ternary('x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu') }}"
+
+    - name: Determine uv download URL
+      ansible.builtin.set_fact:
+        uv_download_url: >-
+          https://github.com/astral-sh/uv/releases/{{ (python_uv_version == 'latest') | ternary('latest/download', 'download/' + python_uv_version) }}/uv-{{ uv_arch }}.tar.gz
+
+    - name: Create temporary directory for uv download
+      ansible.builtin.file:
+        path: /tmp/uv-install
+        state: directory
+        mode: '0755'
+
+    - name: Download uv tarball
+      ansible.builtin.get_url:
+        url: '{{ uv_download_url }}'
+        dest: /tmp/uv-install/uv.tar.gz
+        mode: '0644'
+
+    - name: Extract uv tarball
+      ansible.builtin.unarchive:
+        src: /tmp/uv-install/uv.tar.gz
+        dest: /tmp/uv-install
+        remote_src: true
+
+    - name: Find extracted uv binary
+      ansible.builtin.find:
+        paths: /tmp/uv-install
+        patterns: 'uv'
+        file_type: file
+        recurse: true
+      register: uv_extracted_binary
+
+    - name: Copy uv binary to install directory
+      ansible.builtin.copy:
+        src: '{{ uv_extracted_binary.files[0].path }}'
+        dest: '{{ python_uv_install_dir }}/uv'
+        mode: '0755'
+        remote_src: true
+
+    - name: Clean up temporary directory
+      ansible.builtin.file:
+        path: /tmp/uv-install
+        state: absent
+
+- name: Create required directories
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: directory
+    recurse: true
+  loop:
+    - '{{ python_install_dir }}'
+    - /etc/profile.d
+    - /etc/fish/conf.d
+
+- name: Remove legacy miniconda installation
+  ansible.builtin.file:
+    path: '{{ python_install_dir }}/miniconda'
+    state: absent
+
+- name: Find existing cpython directories
+  ansible.builtin.find:
+    paths: '{{ python_install_dir }}'
+    file_type: directory
+    patterns: 'cpython-*'
+  register: existing_cpython_dirs
+
+- name: Find existing version symlinks
+  ansible.builtin.find:
+    paths: '{{ python_install_dir }}'
+    file_type: link
+    patterns: '3.*'
+  register: existing_version_symlinks
+
+- name: Remove unused Python versions
+  when: python_remove_unused_python_versions | bool and (existing_cpython_dirs.matched > 0 or existing_version_symlinks.matched > 0)
+  ansible.builtin.include_tasks: remove.yaml
+
+- name: Install Python versions
+  ansible.builtin.command: '{{ python_uv_install_dir }}/uv python install --install-dir {{ python_install_dir }} {{ item }}'
+  loop: '{{ python_interpreter_versions }}'
+  register: uv_python_install
+  changed_when: "'Installed' in uv_python_install.stdout"
+  when: not ansible_check_mode
+
+- name: Find installed Python binaries
+  ansible.builtin.command: '{{ python_uv_install_dir }}/uv python find {{ item }}'
+  environment:
+    UV_PYTHON_INSTALL_DIR: '{{ python_install_dir }}'
+  loop: '{{ python_interpreter_versions }}'
+  register: uv_python_find
+  changed_when: false
+  when: not ansible_check_mode
+
+- name: Resolve cpython directory for each version
+  ansible.builtin.set_fact:
+    python_version_paths: >-
+      {{ python_version_paths | default([]) + [{'version': item.item, 'binary': item.stdout | trim, 'cpython_dir': item.stdout | trim | regex_replace('/bin/python[0-9.]*$', '')}] }}
+  loop: '{{ uv_python_find.results }}'
+  no_log: true
+  when: not ansible_check_mode
+
+- name: Check for legacy conda version directories
+  ansible.builtin.stat:
+    path: '{{ python_install_dir }}/{{ item.version }}'
+  loop: '{{ python_version_paths | default([]) }}'
+  register: legacy_version_dirs
+  loop_control:
+    label: '{{ python_install_dir }}/{{ item.version }}'
+
+- name: Remove legacy conda version directories
+  ansible.builtin.file:
+    path: '{{ python_install_dir }}/{{ item.item.version }}'
+    state: absent
+  loop: '{{ legacy_version_dirs.results | default([]) }}'
+  when: item.stat.exists and item.stat.isdir and not item.stat.islnk
+  loop_control:
+    label: '{{ python_install_dir }}/{{ item.item.version }}'
+
+- name: Create version symlinks
+  ansible.builtin.file:
+    src: '{{ item.cpython_dir }}'
+    dest: '{{ python_install_dir }}/{{ item.version }}'
+    state: link
+    force: true
+  loop: '{{ python_version_paths | default([]) }}'
+  loop_control:
+    label: '{{ python_install_dir }}/{{ item.version }} -> {{ item.cpython_dir }}'
+
+- name: Create python compatibility symlink
+  ansible.builtin.file:
+    src: '{{ item.cpython_dir }}/bin/python3'
+    dest: '{{ item.cpython_dir }}/bin/python'
+    state: link
+    force: true
+  loop: '{{ python_version_paths | default([]) }}'
+  loop_control:
+    label: '{{ item.cpython_dir }}/bin/python -> python3'
+
+- name: Configure profile.d for bash
+  ansible.builtin.copy:
+    dest: /etc/profile.d/python.sh
+    mode: '0755'
+    content: |
+      export PATH={% for ver in python_interpreter_versions | reverse %}{{ python_install_dir }}/{{ ver }}/bin{% if not loop.last %}:{% endif %}{% endfor %}:$PATH
+
+- name: Configure profile.d for fish
+  ansible.builtin.copy:
+    dest: /etc/fish/conf.d/python.fish
+    mode: '0755'
+    content: |
+      set -gx PATH{% for ver in python_interpreter_versions | reverse %} '{{ python_install_dir }}/{{ ver }}/bin'{% endfor %} $PATH
+
+- name: Install ipykernel for use in Jupyter
+  ansible.builtin.command: '{{ python_uv_install_dir }}/uv pip install --break-system-packages --python {{ item.binary }} ipykernel'
+  loop: '{{ python_version_paths | default([]) }}'
+  loop_control:
+    label: 'Python {{ item.version }}'
+  register: uv_pip_install
+  changed_when: "'Installed' in uv_pip_install.stdout"
+  when: not ansible_check_mode
+
+- name: Configure kernel in Jupyter
+  ansible.builtin.command: '{{ item.binary }} -m ipykernel install --name py{{ item.version }} --display-name "Python {{ item.version }}"'
+  loop: '{{ python_version_paths | default([]) }}'
+  loop_control:
+    label: 'Python {{ item.version }}'
+  changed_when: true

@@ -3,7 +3,7 @@
   gather_facts: true
   vars:
     python_interpreter_versions:
-      - '3.11.3'
       - '3.12'
+      - '3.13'
   roles:
     - role: python

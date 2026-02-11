@@ -1,31 +1,42 @@
-- name: Remove mode - Debug - Show variables
+- name: Remove mode - Build list of wanted version patterns
+  ansible.builtin.set_fact:
+    wanted_version_patterns: "{{ python_interpreter_versions | map('string') | list }}"
+
+- name: Remove mode - Identify cpython directories to remove
+  ansible.builtin.set_fact:
+    cpython_dirs_to_remove: >-
+      {{ existing_cpython_dirs.files | default([])
+      | rejectattr('path', 'search', '(' + wanted_version_patterns | join('|') + ')')
+      | list }}
+
+- name: Remove mode - Identify version symlinks to remove
+  ansible.builtin.set_fact:
+    version_symlinks_to_remove: >-
+      {{ existing_version_symlinks.files | default([])
+      | rejectattr('path', 'search', '/(' + wanted_version_patterns | join('|') + ')$')
+      | list }}
+
+- name: Remove mode - Display items to remove
   ansible.builtin.debug:
     msg:
-      - 'Installed versions: {{ python_versions_installed_list | default([]) }}'
-      - 'Wanted versions: {{ python_interpreter_versions }}'
-      - 'Remove unused: {{ python_remove_unused_python_versions }}'
+      - 'Wanted versions: {{ wanted_version_patterns }}'
+      - "cpython dirs to remove: {{ cpython_dirs_to_remove | map(attribute='path') | list }}"
+      - "Version symlinks to remove: {{ version_symlinks_to_remove | map(attribute='path') | list }}"
 
-- name: Remove mode - Identify Python versions to remove
-  vars:
-    # Normalize wanted versions to strings
-    wanted_versions_normalized: "{{ python_interpreter_versions | map('string') | list }}"
-  ansible.builtin.set_fact:
-    python_versions_to_remove: "{{ python_versions_installed_list | default([]) | rejectattr('version', 'match', '^(' + wanted_versions_normalized | join('|') + ')(\\.|$)') | list }}"
-
-- name: Remove mode - Display Python versions that will be removed
-  ansible.builtin.debug:
-    msg: >-
-      {%- if python_versions_to_remove | length > 0 -%}
-      Removing Python versions: {{ python_versions_to_remove | map(attribute='version') | list | join(', ') }}
-      {%- else -%}
-      No Python versions to remove
-      {%- endif -%}
-
-- name: Remove mode - Remove unwanted Python versions
-  when: python_versions_to_remove | length > 0
+- name: Remove mode - Remove unwanted cpython directories
+  when: cpython_dirs_to_remove | length > 0
   ansible.builtin.file:
     path: '{{ item.path }}'
     state: absent
-  loop: '{{ python_versions_to_remove }}'
+  loop: '{{ cpython_dirs_to_remove }}'
   loop_control:
-    label: '{{ item.version }} ({{ item.path }})'
+    label: '{{ item.path }}'
+
+- name: Remove mode - Remove orphaned version symlinks
+  when: version_symlinks_to_remove | length > 0
+  ansible.builtin.file:
+    path: '{{ item.path }}'
+    state: absent
+  loop: '{{ version_symlinks_to_remove }}'
+  loop_control:
+    label: '{{ item.path }}'

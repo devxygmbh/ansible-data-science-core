@@ -72,3 +72,4 @@ CHANGELOG.md
 ansible_collections/
 dep_roles/
 *.tar.gz
+CLAUDE.md

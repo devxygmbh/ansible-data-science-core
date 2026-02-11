@@ -4,27 +4,49 @@
   gather_facts: false
 
   tasks:
-    - name: Find all executables under /opt/python
-      ansible.builtin.find:
-        paths: '/opt/python'
-        patterns: 'python3'
-        file_type: link
-        recurse: true
-        use_regex: false
-      register: python_installed
-
-    - name: Gather file stats for each python executable
+    - name: Check that uv binary exists and is executable
       ansible.builtin.stat:
-        path: '{{ item.path }}'
-      loop: '{{ python_installed.files }}'
-      register: python_files_stats
+        path: /usr/local/bin/uv
+      register: uv_stat
 
-    - name: Assert python binaries are executable
+    - name: Assert uv binary is present and executable
+      ansible.builtin.assert:
+        that:
+          - uv_stat.stat.exists
+          - uv_stat.stat.executable
+        msg: 'uv binary at /usr/local/bin/uv is missing or not executable'
+
+    - name: Check version symlinks exist
+      ansible.builtin.stat:
+        path: '/opt/python/{{ item }}'
+      loop:
+        - '3.12'
+        - '3.13'
+      register: version_symlinks
+
+    - name: Assert version symlinks are present and are symlinks
       ansible.builtin.assert:
         that:
           - item.stat.exists
           - item.stat.islnk
-        msg: 'python binary at {{ item.stat.path }} is not executable'
-      loop: '{{ python_files_stats.results }}'
-      when: item.stat.exists
-      no_log: true # too verbose
+        msg: 'Version symlink at /opt/python/{{ item.item }} is missing or not a symlink'
+      loop: '{{ version_symlinks.results }}'
+      loop_control:
+        label: '/opt/python/{{ item.item }}'
+
+    - name: Run python3 --version through each symlinked path
+      ansible.builtin.command: '/opt/python/{{ item }}/bin/python3 --version'
+      loop:
+        - '3.12'
+        - '3.13'
+      register: python_version_output
+      changed_when: false
+
+    - name: Assert Python versions are correct
+      ansible.builtin.assert:
+        that:
+          - "'Python 3.' in item.stdout"
+        msg: 'Python at /opt/python/{{ item.item }}/bin/python3 did not return expected version, got: {{ item.stdout }}'
+      loop: '{{ python_version_output.results }}'
+      loop_control:
+        label: '/opt/python/{{ item.item }}'
