@@ -1,0 +1,4 @@
+- name: Install system libraries (RedHat)
+  ansible.builtin.dnf:
+    name: '{{ syslibs_packages_redhat + syslibs_extra_packages }}'
+    state: present

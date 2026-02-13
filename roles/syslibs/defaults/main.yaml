@@ -1,0 +1,80 @@
+# @var syslibs_packages_redhat:type: list
+# @var syslibs_packages_redhat:description: System library packages to install on RedHat-based systems
+syslibs_packages_redhat:
+  - cairo-devel
+  - cargo
+  - fontconfig-devel
+  - freetype-devel
+  - freetds
+  - fribidi-devel
+  - gdal-devel
+  - geos-devel
+  - git
+  - glpk-devel
+  - gmp-devel
+  - harfbuzz-devel
+  - ImageMagick-c++-devel
+  - java-21-openjdk-headless
+  - jq-devel
+  - libgit2-devel
+  - libicu-devel
+  - libpng-devel
+  - libpq-devel
+  - librsvg2-devel
+  - libsecret-devel
+  - libsodium-devel
+  - libxml2-devel
+  - mesa-libGLU-devel
+  - mpfr-devel
+  - netcdf-devel
+  - poppler-utils
+  - proj-devel
+  - readline-devel
+  - rust
+  - sqlite-devel
+  - udunits2-devel
+  - unixODBC-devel
+  - zlib-devel
+
+# @var syslibs_packages_ubuntu:type: list
+# @var syslibs_packages_ubuntu:description: System library packages to install on Ubuntu systems
+syslibs_packages_ubuntu:
+  - cargo
+  - default-jdk-headless
+  - freetds-common
+  - git
+  - jags
+  - libcairo2-dev
+  - libfontconfig-dev
+  - libfreetype-dev
+  - libfribidi-dev
+  - libgdal-dev
+  - libgeos-dev
+  - libgit2-dev
+  - libglpk-dev
+  - libglu1-mesa-dev
+  - libgmp3-dev
+  - libharfbuzz-dev
+  - libicu-dev
+  - libjq-dev
+  - libmagick++-dev
+  - libmpfr-dev
+  - libnetcdf-dev
+  - libpng-dev
+  - libpq-dev
+  - libreadline-dev
+  - librsvg2-dev
+  - libsecret-1-dev
+  - libsodium-dev
+  - libsqlite3-dev
+  - libudunits2-dev
+  - libv8-dev
+  - libxml2-dev
+  - poppler-utils
+  - rustc
+  - unixodbc-dev
+  - zlib1g-dev
+
+# @var syslibs_extra_packages:type: list
+# @var syslibs_extra_packages:description: Additional packages to install on any platform (appended to the OS-specific list)
+syslibs_extra_packages: []

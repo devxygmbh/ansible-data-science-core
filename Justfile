@@ -61,6 +61,12 @@ system_check:
 system_apply:
     ansible-playbook -D test/system.yaml
 
+syslibs_check:
+  ansible-playbook -C -D test/syslibs.yaml
+
+syslibs_apply:
+  ansible-playbook -D test/syslibs.yaml
+
 stop SERVER:
     hcloud server poweroff {{SERVER}}
 

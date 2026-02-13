@@ -1,0 +1,5 @@
+- name: Install system libraries (Ubuntu)
+  ansible.builtin.apt:
+    name: '{{ syslibs_packages_ubuntu + syslibs_extra_packages }}'
+    state: present
+    update_cache: true

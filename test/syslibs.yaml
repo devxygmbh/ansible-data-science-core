@@ -1,0 +1,6 @@
+- name: Install system libraries
+  hosts: all
+  become: true
+
+  roles:
+    - role: syslibs

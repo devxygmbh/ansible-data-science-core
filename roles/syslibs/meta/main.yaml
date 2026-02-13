@@ -1,0 +1,26 @@
+galaxy_info:
+  author: Patrick Schratz
+  description: Installs common system libraries for data science workloads
+  company: devXY GmbH
+  issue_tracker_url: https://codefloe.com/devxy/data_science_core/issues
+
+  license: AGPL-3.0-or-later
+
+  min_ansible_version: '2.9'
+
+  platforms:
+    - name: EL
+      versions:
+        - '8'
+        - '9'
+        - '10'
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+
+  galaxy_tags:
+    - syslibs
+    - datascience
+
+dependencies: []
