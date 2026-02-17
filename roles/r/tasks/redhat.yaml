@@ -11,16 +11,9 @@
     state: enabled
   when: ansible_facts['distribution_major_version'] | int in [8, 9]
 
-- name: Ensure R-core deps are installed (2)
-  when: ansible_facts['os_family'] == 'RedHat'
+- name: Install build dependencies for R
   ansible.builtin.dnf:
-    name: "{{ 'flexiblas-devel' if ansible_facts['distribution_major_version'] | int == 9 else 'openblas-devel' }}"
     update_cache: true
-    state: present
-
-- name: Install build dependencies for R (RHEL 10)
-  when: ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] | int == 10
-  ansible.builtin.dnf:
     name:
       - gcc-c++
       - automake
@@ -32,6 +25,8 @@
       - readline-devel
       - libpng-devel
       - libjpeg-turbo-devel
+      - cairo-devel
+      - pango-devel
       - libcurl-devel
       - bzip2-devel
       - libzstd-devel
@@ -40,27 +35,22 @@
       - gcc-gfortran
       - libSM-devel
       - libXt-devel
+      - libXmu-devel
       - texlive-collection-latexrecommended
-      - java-21-openjdk-devel
+      - texlive-upquote
+      - "{{ 'java-21-openjdk-devel' if ansible_facts['distribution_major_version'] | int >= 9 else 'java-11-openjdk-devel' }}"
       - xz-devel
       - libicu-devel
       - tcl-devel
       - libICE-devel
       - texinfo-tex
-      - flexiblas-devel
+      - "{{ 'flexiblas-devel' if ansible_facts['distribution_major_version'] | int >= 9 else 'openblas-devel' }}"
       - valgrind-devel
       - libtirpc-devel
       - tk-devel
       - less
       - libdeflate-devel
     state: present
-
-- name: Install build dependencies for R (RHEL 8/9)
-  when: ansible_facts['os_family'] == 'RedHat' and ansible_facts['distribution_major_version'] | int in [8, 9]
-  ansible.builtin.command:
-    cmd: 'dnf builddep -y R'
-  register: dnf_result
-  changed_when: '"Nothing to do" not in dnf_result.stdout'
 
 - name: Check if /opt/R is empty
   ansible.builtin.find:
