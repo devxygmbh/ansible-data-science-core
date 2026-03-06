@@ -20,7 +20,7 @@
 
 All (Quarto is a generic binary)
 
-Installs Quarto <https://quarto.org/>
+<generator object sync_do_map at 0x10c14f640>
 
 ## Default Variables
 

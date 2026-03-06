@@ -31,7 +31,7 @@ include_toc: true
 - 22.04 (Jammy)
 - 24.04 (Noble)
 
-Installs R <https://cran.r-project.org/>
+<generator object sync_do_map at 0x10c288040>
 
 ## Default Variables
 
