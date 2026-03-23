@@ -61,25 +61,25 @@
     state: directory
     recurse: true
   loop:
-    - '{{ python_install_dir }}'
+    - '{{ python_installation_dir }}'
     - /etc/profile.d
     - /etc/fish/conf.d
 
 - name: Remove legacy miniconda installation
   ansible.builtin.file:
-    path: '{{ python_install_dir }}/miniconda'
+    path: '{{ python_installation_dir }}/miniconda'
     state: absent
 
 - name: Find existing cpython directories
   ansible.builtin.find:
-    paths: '{{ python_install_dir }}'
+    paths: '{{ python_installation_dir }}'
     file_type: directory
     patterns: 'cpython-*'
   register: existing_cpython_dirs
 
 - name: Find existing version symlinks
   ansible.builtin.find:
-    paths: '{{ python_install_dir }}'
+    paths: '{{ python_installation_dir }}'
     file_type: link
     patterns: '3.*'
   register: existing_version_symlinks
@@ -89,7 +89,7 @@
   ansible.builtin.include_tasks: remove.yaml
 
 - name: Install Python versions
-  ansible.builtin.command: '{{ python_uv_install_dir }}/uv python install --install-dir {{ python_install_dir }} {{ item }}'
+  ansible.builtin.command: '{{ python_uv_install_dir }}/uv python install --install-dir {{ python_installation_dir }} {{ item }}'
   loop: '{{ python_interpreter_versions }}'
   register: uv_python_install
   changed_when: "'Installed' in uv_python_install.stdout"
@@ -98,7 +98,7 @@
 - name: Find installed Python binaries
   ansible.builtin.command: '{{ python_uv_install_dir }}/uv python find {{ item }}'
   environment:
-    UV_PYTHON_INSTALL_DIR: '{{ python_install_dir }}'
+    UV_PYTHON_INSTALL_DIR: '{{ python_installation_dir }}'
   loop: '{{ python_interpreter_versions }}'
   register: uv_python_find
   changed_when: false
@@ -114,30 +114,30 @@
 
 - name: Check for legacy conda version directories
   ansible.builtin.stat:
-    path: '{{ python_install_dir }}/{{ item.version }}'
+    path: '{{ python_installation_dir }}/{{ item.version }}'
   loop: '{{ python_version_paths | default([]) }}'
   register: legacy_version_dirs
   loop_control:
-    label: '{{ python_install_dir }}/{{ item.version }}'
+    label: '{{ python_installation_dir }}/{{ item.version }}'
 
 - name: Remove legacy conda version directories
   ansible.builtin.file:
-    path: '{{ python_install_dir }}/{{ item.item.version }}'
+    path: '{{ python_installation_dir }}/{{ item.item.version }}'
     state: absent
   loop: '{{ legacy_version_dirs.results | default([]) }}'
   when: item.stat.exists and item.stat.isdir and not item.stat.islnk
   loop_control:
-    label: '{{ python_install_dir }}/{{ item.item.version }}'
+    label: '{{ python_installation_dir }}/{{ item.item.version }}'
 
 - name: Create version symlinks
   ansible.builtin.file:
     src: '{{ item.cpython_dir }}'
-    dest: '{{ python_install_dir }}/{{ item.version }}'
+    dest: '{{ python_installation_dir }}/{{ item.version }}'
     state: link
     force: true
   loop: '{{ python_version_paths | default([]) }}'
   loop_control:
-    label: '{{ python_install_dir }}/{{ item.version }} -> {{ item.cpython_dir }}'
+    label: '{{ python_installation_dir }}/{{ item.version }} -> {{ item.cpython_dir }}'
 
 - name: Create python compatibility symlink
   ansible.builtin.file:
@@ -149,19 +149,25 @@
   loop_control:
     label: '{{ item.cpython_dir }}/bin/python -> python3'
 
-- name: Configure profile.d for bash
+- name: Configure profile.d for bash (Python)
   ansible.builtin.copy:
     dest: /etc/profile.d/python.sh
     mode: '0755'
     content: |
-      export PATH={% for ver in python_interpreter_versions | reverse %}{{ python_install_dir }}/{{ ver }}/bin{% if not loop.last %}:{% endif %}{% endfor %}:$PATH
+      export PATH={% for ver in python_interpreter_versions | reverse %}{{ python_installation_dir }}/{{ ver }}/bin{% if not loop.last %}:{% endif %}{% endfor %}:$PATH
 
-- name: Configure profile.d for fish
+- name: Ensure fish config directory exists
+  ansible.builtin.file:
+    path: /etc/fish/conf.d
+    state: directory
+    mode: '0755'
+
+- name: Configure profile.d for fish (Python)
   ansible.builtin.copy:
     dest: /etc/fish/conf.d/python.fish
     mode: '0755'
     content: |
-      set -gx PATH{% for ver in python_interpreter_versions | reverse %} '{{ python_install_dir }}/{{ ver }}/bin'{% endfor %} $PATH
+      set -gx PATH{% for ver in python_interpreter_versions | reverse %} '{{ python_installation_dir }}/{{ ver }}/bin'{% endfor %} $PATH
 
 - name: Install ipykernel for use in Jupyter
   ansible.builtin.command: '{{ python_uv_install_dir }}/uv pip install --break-system-packages --python {{ item.binary }} ipykernel'

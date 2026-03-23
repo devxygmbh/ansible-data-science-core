@@ -34,9 +34,9 @@
     - zip
     - zlib1g-dev
 
-- name: Check if /opt/R is empty
+- name: Check if R installation directory is empty
   ansible.builtin.find:
-    paths: /opt/R
+    paths: '/opt/R'
     file_type: directory
     patterns: "[0-9]\\.[0-9]\\.[0-9]"
   register: any_r_installed
@@ -58,7 +58,7 @@
     - name: Create diff between lists
       when: any_r_installed.matched | int != 0
       ansible.builtin.set_fact:
-        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_versions) }}'
+        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_interpreter_versions) }}'
 
     - name: Remove deprecated/old R versions
       when: r_remove_unused_r_versions | bool and any_r_installed.matched | int != 0
@@ -71,8 +71,26 @@
       ansible.builtin.set_fact:
         os_identifier: "{{ '2404' if ansible_facts['distribution_version'] == '24.04' else '2204' if ansible_facts['distribution_version'] == '22.04' else '2004' if ansible_facts['distribution_version'] == '20.04' }}"
 
+    - name: Download R binary from Artifactory (arm64)
+      when:
+        - dsc_artifactory_enabled | default(false)
+        - ansible_facts['architecture'] == 'aarch64'
+        - not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      ansible.builtin.get_url:
+        url: '{{ dsc_artifactory_base_url }}/{{ dsc_artifactory_r_repo }}/ubuntu-{{ os_identifier }}/pkgs/r-{{ item }}_1_arm64.deb'
+        dest: '/tmp/R-{{ item }}.deb'
+        url_username: '{{ dsc_artifactory_username }}'
+        url_password: '{{ dsc_artifactory_password }}'
+        force_basic_auth: true
+        timeout: '{{ dsc_artifactory_timeout }}'
+        mode: '0644'
+      loop: '{{ r_interpreter_versions }}'
+
     - name: Download R binary (arm64)
-      when: ansible_facts['architecture'] == 'aarch64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      when:
+        - not (dsc_artifactory_enabled | default(false))
+        - ansible_facts['architecture'] == 'aarch64'
+        - not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
         url: 'https://fsn1.your-objectstorage.com/devxy-r-builds/{{ os_identifier }}/r-{{ item }}_1_arm64.deb'
         dest: '/tmp/R-{{ item }}.deb'
@@ -80,8 +98,26 @@
         mode: '0644'
       loop: '{{ r_interpreter_versions }}'
 
-    - name: Download R binary
-      when: ansible_facts['architecture'] == 'x86_64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+    - name: Download R binary from Artifactory (x86_64)
+      when:
+        - dsc_artifactory_enabled | default(false)
+        - ansible_facts['architecture'] == 'x86_64'
+        - not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      ansible.builtin.get_url:
+        url: '{{ dsc_artifactory_base_url }}/{{ dsc_artifactory_r_repo }}/ubuntu-{{ os_identifier }}/pkgs/r-{{ item }}_1_amd64.deb'
+        dest: '/tmp/R-{{ item }}.deb'
+        url_username: '{{ dsc_artifactory_username }}'
+        url_password: '{{ dsc_artifactory_password }}'
+        force_basic_auth: true
+        timeout: '{{ dsc_artifactory_timeout }}'
+        mode: '0644'
+      loop: '{{ r_interpreter_versions }}'
+
+    - name: Download R binary (x86_64)
+      when:
+        - not (dsc_artifactory_enabled | default(false))
+        - ansible_facts['architecture'] == 'x86_64'
+        - not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
         url: 'https://cdn.posit.co/r/ubuntu-{{ os_identifier }}/pkgs/r-{{ item }}_1_amd64.deb'
         dest: '/tmp/R-{{ item }}.deb'
@@ -111,6 +147,12 @@
         state: absent
       loop: '{{ r_interpreter_versions }}'
 
+- name: Install ccache for source build
+  when: r_source_build_use_ccache | bool
+  ansible.builtin.apt:
+    name: ccache
+    state: present
+
 - name: Install R from tarball
   when: not r_interpreter_install_binary | bool
   block:
@@ -129,7 +171,7 @@
     - name: Create diff between lists (source)
       when: any_r_installed.matched | int != 0
       ansible.builtin.set_fact:
-        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_versions) }}'
+        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_interpreter_versions) }}'
 
     - name: Ensure required system dependencies are installed (source)
       when: 'item not in ansible_facts.packages'
@@ -152,6 +194,7 @@
       when: not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.shell: |
         set -xe
+        export PATH="/usr/lib/ccache:$PATH"
         cd "{{ r_interpreter_source_path }}"
         mkdir -p "/opt/R/{{ item }}"
         tar -xzf "R-{{ item }}.tar.gz"
@@ -164,7 +207,9 @@
       loop: '{{ r_interpreter_versions }}'
 
 - name: Configure /etc/Rprofile.site (default, Ubuntu)
-  when: r_custom_repos is undefined
+  when:
+    - r_custom_repos is undefined
+    - r_configure_default_cran_repo
   ansible.builtin.blockinfile:
     create: true
     path: /etc/Rprofile.site

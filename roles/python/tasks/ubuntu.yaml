@@ -1,0 +1,11 @@
+# Python installation via system package manager for Ubuntu/Debian family
+# This file is used when dsc_artifactory_enabled is true
+
+- name: Install Python via system package manager
+  ansible.builtin.apt:
+    name:
+      - 'python{{ item }}'
+      - 'python{{ item }}-venv'
+    state: present
+    update_cache: true
+  loop: '{{ python_interpreter_versions }}'

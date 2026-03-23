@@ -24,10 +24,43 @@ python_uv_version: 'latest'
 # @var python_uv_install_dir:type: string
 python_uv_install_dir: '/usr/local/bin'
 
-# @var python_install_dir:description: Base directory for Python installations
-# @var python_install_dir:type: string
-python_install_dir: '/opt/python'
+# @var python_installation_dir:description: Base directory for Python installations
+# @var python_installation_dir:type: string
+python_installation_dir: '/opt/python'
 
 # @var python_remove_unused_python_versions:description: Whether to remove python versions not listed in `python_interpreter_versions`
 # @var python_remove_unused_python_versions:type: boolean
 python_remove_unused_python_versions: true
+
+### SSL/TLS configuration
+# @var python_requests_ca_bundle:description: Custom CA bundle path for Python requests/pip (sets REQUESTS_CA_BUNDLE globally via /etc/environment)
+# @var python_requests_ca_bundle:type: string
+
+### Artifactory configuration
+# @var dsc_artifactory_enabled:description: Enable downloading assets from Artifactory instead of public sources. When enabled, Python is installed from DEB/RPM packages instead of uv.
+# @var dsc_artifactory_enabled:type: boolean
+dsc_artifactory_enabled: false
+
+# @var dsc_artifactory_base_url:description: Base URL for Artifactory instance (e.g., https://artifactory.example.com/artifactory)
+# @var dsc_artifactory_base_url:type: string
+# dsc_artifactory_base_url:
+
+# @var dsc_artifactory_username:description: Username for Artifactory authentication
+# @var dsc_artifactory_username:type: string
+# dsc_artifactory_username:
+
+# @var dsc_artifactory_password:description: Password for Artifactory authentication (use vault for production)
+# @var dsc_artifactory_password:type: string
+# dsc_artifactory_password:
+
+# @var dsc_artifactory_python_repo:description: Repository path for Python RPM/DEB packages in Artifactory
+# @var dsc_artifactory_python_repo:type: string
+# dsc_artifactory_python_repo: python-packages
+
+# @var dsc_artifactory_pypi_repo:description: Repository path for PyPI packages in Artifactory (used as pip index)
+# @var dsc_artifactory_pypi_repo:type: string
+# dsc_artifactory_pypi_repo: pypi-remote
+
+# @var dsc_artifactory_timeout:description: Timeout in seconds for Artifactory downloads
+# @var dsc_artifactory_timeout:type: integer
+dsc_artifactory_timeout: 300

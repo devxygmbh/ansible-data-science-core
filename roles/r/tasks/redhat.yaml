@@ -1,15 +1,20 @@
 # to be able to install R-core
-- name: Ensure R-core deps are installed (1)
+# epel-release is only available on AlmaLinux/Rocky/CentOS, not on RHEL
+- name: Ensure EPEL is installed (AlmaLinux/Rocky/CentOS)
+  when: ansible_facts['distribution'] != 'RedHat'
   ansible.builtin.dnf:
     name: epel-release
     state: present
 
 # for flexiblas-devel
-- name: Enable appropriate repository for RedHat 8 or 9
+# On RHEL, CodeReady Builder is enabled via subscription-manager, not dnf config-manager
+- name: Enable crb/powertools repository (AlmaLinux/Rocky/CentOS)
+  when:
+    - ansible_facts['distribution'] != 'RedHat'
+    - ansible_facts['distribution_major_version'] | int in [8, 9]
   community.general.dnf_config_manager:
     name: "{{ 'crb' if ansible_facts['distribution_major_version'] | int == 9 else 'powertools' }}"
     state: enabled
-  when: ansible_facts['distribution_major_version'] | int in [8, 9]
 
 - name: Install build dependencies for R
   ansible.builtin.dnf:
@@ -52,9 +57,9 @@
       - libdeflate-devel
     state: present
 
-- name: Check if /opt/R is empty
+- name: Check if R installation directory is empty
   ansible.builtin.find:
-    paths: /opt/R
+    paths: '/opt/R'
     file_type: directory
     patterns: "[0-9]\\.[0-9]\\.[0-9]"
   register: any_r_installed
@@ -76,7 +81,7 @@
     - name: Create diff between lists
       when: any_r_installed.matched | int != 0
       ansible.builtin.set_fact:
-        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_versions) }}'
+        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_interpreter_versions) }}'
 
     - name: Remove deprecated/old R versions
       when: r_remove_unused_r_versions | bool and any_r_installed.matched | int != 0
@@ -85,8 +90,30 @@
         state: absent
       loop: '{{ unwanted_r_versions }}'
 
+    - name: Set Posit OS identifier for download
+      ansible.builtin.set_fact:
+        posit_os_identifier: "{{ 'centos' if ansible_facts['distribution_major_version'] | int == 8 else 'rhel' }}"
+
+    - name: Download R binary from Artifactory (arm64)
+      when:
+        - dsc_artifactory_enabled | default(false)
+        - ansible_facts['architecture'] == 'aarch64'
+        - not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      ansible.builtin.get_url:
+        url: '{{ dsc_artifactory_base_url }}/{{ dsc_artifactory_r_repo }}/R-{{ item }}-1-1.aarch64.rpm'
+        dest: '/tmp/R-{{ item }}.rpm'
+        url_username: '{{ dsc_artifactory_username }}'
+        url_password: '{{ dsc_artifactory_password }}'
+        force_basic_auth: true
+        timeout: '{{ dsc_artifactory_timeout }}'
+        mode: '0644'
+      loop: '{{ r_interpreter_versions }}'
+
     - name: Download R binary (arm64)
-      when: r_interpreter_install_binary | bool and ansible_facts['architecture'] == 'aarch64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      when:
+        - not (dsc_artifactory_enabled | default(false))
+        - ansible_facts['architecture'] == 'aarch64'
+        - not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
         url: "https://fsn1.your-objectstorage.com/devxy-r-builds/el{{ ansible_facts['distribution_major_version'] }}/R-{{ item }}-1-1.aarch64.rpm"
         dest: '/tmp/R-{{ item }}.rpm'
@@ -94,13 +121,26 @@
         mode: '0644'
       loop: '{{ r_interpreter_versions }}'
 
-    - name: Set Posit OS identifier for download
-      when: r_interpreter_install_binary | bool
-      ansible.builtin.set_fact:
-        posit_os_identifier: "{{ 'centos' if ansible_facts['distribution_major_version'] | int == 8 else 'rhel' }}"
+    - name: Download R binary from Artifactory (x86_64)
+      when:
+        - dsc_artifactory_enabled | default(false)
+        - ansible_facts['architecture'] == 'x86_64'
+        - not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      ansible.builtin.get_url:
+        url: '{{ dsc_artifactory_base_url }}/{{ dsc_artifactory_r_repo }}/R-{{ item }}-1-1.x86_64.rpm'
+        dest: '/tmp/R-{{ item }}.rpm'
+        url_username: '{{ dsc_artifactory_username }}'
+        url_password: '{{ dsc_artifactory_password }}'
+        force_basic_auth: true
+        timeout: '{{ dsc_artifactory_timeout }}'
+        mode: '0644'
+      loop: '{{ r_interpreter_versions }}'
 
-    - name: Download R binary
-      when: r_interpreter_install_binary | bool and ansible_facts['architecture'] == 'x86_64' and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+    - name: Download R binary (x86_64)
+      when:
+        - not (dsc_artifactory_enabled | default(false))
+        - ansible_facts['architecture'] == 'x86_64'
+        - not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.get_url:
         url: "https://cdn.posit.co/r/{{ posit_os_identifier }}-{{ ansible_facts['distribution_major_version'] }}/pkgs/R-{{ item }}-1-1.x86_64.rpm"
         dest: '/tmp/R-{{ item }}.rpm'
@@ -108,14 +148,14 @@
       loop: '{{ r_interpreter_versions }}'
 
     - name: Uninstall existing R binaries
-      when: r_interpreter_install_binary | bool and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      when: not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.dnf:
         name: 'r-{{ item }}'
         state: absent
       loop: '{{ r_interpreter_versions }}'
 
     - name: Install R binary
-      when: r_interpreter_install_binary | bool and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      when: not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.dnf:
         name: '/tmp/R-{{ item }}.rpm'
         state: present
@@ -123,11 +163,17 @@
       loop: '{{ r_interpreter_versions }}'
 
     - name: Cleanup downloaded assets
-      when: r_interpreter_install_binary | bool and not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
+      when: not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.file:
         path: '/tmp/R-{{ item }}.rpm'
         state: absent
       loop: '{{ r_interpreter_versions }}'
+
+- name: Install ccache for source build
+  when: r_source_build_use_ccache | bool
+  ansible.builtin.dnf:
+    name: ccache
+    state: present
 
 - name: Install R from tarball
   when: not r_interpreter_install_binary | bool
@@ -144,7 +190,7 @@
     - name: Create diff between lists
       when: any_r_installed.matched | int != 0
       ansible.builtin.set_fact:
-        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_versions) }}'
+        unwanted_r_versions: '{{ r_installed_list.stdout_lines | difference(r_interpreter_versions) }}'
 
     - name: Ensure required system dependencies are installed
       when: 'item not in ansible_facts.packages'
@@ -152,7 +198,6 @@
         name: '{{ item }}'
         state: present
       loop:
-        - ccache
         - cmake
         - xorg-x11-server-devel
         - libXt-devel
@@ -168,10 +213,11 @@
       when: not (item in r_installed.results | selectattr('stat.exists') | map(attribute='item') | list)
       ansible.builtin.shell: |
         export R_RD4PDF="times,hyper"
+        export PATH="/usr/lib64/ccache:$PATH"
         cd "{{ r_interpreter_source_path }}"
         tar -xzf "R-{{ item }}.tar.gz"
         cd "R-{{ item }}"
-        ./configure --prefix="/opt/{{ item }}/" --enable-R-shlib --with-tcltk --enable-memory-profiling --with-x --with-system-valgrind-headers --with-tcl-config=/usr/lib64/tclConfig.sh --with-tk-config=/usr/lib64/tkConfig.sh --enable-prebuilt-html
+        ./configure --prefix="/opt/R/{{ item }}/" --enable-R-shlib --with-tcltk --enable-memory-profiling --with-x --with-system-valgrind-headers --with-tcl-config=/usr/lib64/tclConfig.sh --with-tk-config=/usr/lib64/tkConfig.sh --enable-prebuilt-html
         make -j 4 -O
         make install
         cd ..
@@ -179,7 +225,9 @@
       loop: '{{ r_interpreter_versions }}'
 
 - name: Configure /etc/Rprofile.site (default)
-  when: r_custom_repos is undefined
+  when:
+    - r_custom_repos is undefined
+    - r_configure_default_cran_repo
   ansible.builtin.blockinfile:
     create: true
     path: /etc/Rprofile.site

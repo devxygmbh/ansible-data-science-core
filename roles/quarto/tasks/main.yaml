@@ -46,16 +46,36 @@
   ansible.builtin.set_fact:
     arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
 
+- name: Download quarto binary from Artifactory
+  when:
+    - dsc_artifactory_enabled | default(false)
+    - quarto_local_tarball_path is not defined
+  ansible.builtin.get_url:
+    url: '{{ dsc_artifactory_base_url }}/{{ dsc_artifactory_quarto_repo }}/v{{ item }}/quarto-{{ item }}-linux-{{ arch }}.tar.gz'
+    dest: '/tmp/quarto-{{ item }}.tar.gz'
+    url_username: '{{ dsc_artifactory_username }}'
+    url_password: '{{ dsc_artifactory_password }}'
+    force_basic_auth: true
+    timeout: '{{ dsc_artifactory_timeout }}'
+    mode: '0644'
+  loop: '{{ quarto_versions }}'
+
 - name: Download quarto binary (GitHub)
-  when: quarto_custom_download_url is not defined
+  when:
+    - not (dsc_artifactory_enabled | default(false))
+    - quarto_custom_download_url is not defined
+    - quarto_local_tarball_path is not defined
   ansible.builtin.get_url:
     url: 'https://github.com/quarto-dev/quarto-cli/releases/download/v{{ item }}/quarto-{{ item }}-linux-{{ arch }}.tar.gz'
     dest: '/tmp/quarto-{{ item }}.tar.gz'
     mode: '0644'
   loop: '{{ quarto_versions }}'
 
-- name: Download quarto binary (Local)
-  when: quarto_custom_download_url is defined and quarto_local_tarball_path is not defined
+- name: Download quarto binary (Custom URL)
+  when:
+    - not (dsc_artifactory_enabled | default(false))
+    - quarto_custom_download_url is defined
+    - quarto_local_tarball_path is not defined
   ansible.builtin.get_url:
     url: '{{ quarto_custom_download_url }}/quarto-{{ item }}-linux-{{ arch }}.tar.gz'
     dest: '/tmp/quarto-{{ item }}.tar.gz'

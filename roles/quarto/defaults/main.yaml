@@ -22,3 +22,28 @@ quarto_add_to_path: true
 # @var quarto_local_tarball_path:type: string
 # @var quarto_local_tarball_path:description: Local path to Quarto tarballs. The tarballs must be named as: `quarto-{{ version }}-linux-{{ arch }}.tar.gz`.
 # quarto_local_tarball_path:
+
+### Artifactory configuration
+# @var dsc_artifactory_enabled:description: Enable downloading assets from Artifactory instead of public sources
+# @var dsc_artifactory_enabled:type: boolean
+dsc_artifactory_enabled: false
+
+# @var dsc_artifactory_base_url:description: Base URL for Artifactory instance (e.g., https://artifactory.example.com/artifactory)
+# @var dsc_artifactory_base_url:type: string
+# dsc_artifactory_base_url:
+
+# @var dsc_artifactory_username:description: Username for Artifactory authentication
+# @var dsc_artifactory_username:type: string
+# dsc_artifactory_username:
+
+# @var dsc_artifactory_password:description: Password for Artifactory authentication (use vault for production)
+# @var dsc_artifactory_password:type: string
+# dsc_artifactory_password:
+
+# @var dsc_artifactory_quarto_repo:description: Repository path for Quarto packages in Artifactory
+# @var dsc_artifactory_quarto_repo:type: string
+# dsc_artifactory_quarto_repo: quarto-releases
+
+# @var dsc_artifactory_timeout:description: Timeout in seconds for Artifactory downloads
+# @var dsc_artifactory_timeout:type: integer
+dsc_artifactory_timeout: 300

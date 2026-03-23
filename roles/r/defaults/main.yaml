@@ -8,6 +8,7 @@ r_interpreter_versions:
   - 4.2.3
   - 4.3.3
   - 4.4.3
+  - 4.5.3
 
 # @var r_interpreter_install_binary:description: Set to `false` to install from a source tarball. The tarball must be named `R-<version>.tar.gz`. Also, set `r_interpreter_source_path` to the local path where the tarball is stored.
 # @var r_interpreter_install_binary:type: boolean
@@ -16,6 +17,10 @@ r_interpreter_install_binary: true
 # @var r_additional_options:description: Download URL for R interpreter binaries. Inspect the code for expected subpaths of each platform
 r_interpreter_download_url: https://fsn1.your-objectstorage.com/devxy-r-builds
 ### Optional vars
+# @var r_configure_default_cran_repo:description: Whether to configure the default CRAN repository in /etc/Rprofile.site
+# @var r_configure_default_cran_repo:type: boolean
+r_configure_default_cran_repo: true
+
 # @var r_custom_repos:description: Additional CRAN-like repositories
 # @var r_custom_repos:type: list
 
@@ -24,3 +29,37 @@ r_interpreter_download_url: https://fsn1.your-objectstorage.com/devxy-r-builds
 
 # @var r_interpreter_source_path:description: Local path to R source tarball
 # @var r_interpreter_source_path:type: string
+
+### Source build options
+# @var r_source_build_use_ccache:description: Use ccache to speed up repeated R source builds (only effective when r_interpreter_install_binary is false)
+# @var r_source_build_use_ccache:type: boolean
+r_source_build_use_ccache: true
+
+# @var r_ccache_dir:description: Directory for the ccache cache. Set to configure a shared/persistent cache location.
+# @var r_ccache_dir:type: string
+r_ccache_dir: /opt/ccache
+
+### Artifactory configuration
+# @var dsc_artifactory_enabled:description: Enable downloading assets from Artifactory instead of public sources
+# @var dsc_artifactory_enabled:type: boolean
+dsc_artifactory_enabled: false
+
+# @var dsc_artifactory_base_url:description: Base URL for Artifactory instance (e.g., https://artifactory.example.com/artifactory)
+# @var dsc_artifactory_base_url:type: string
+# dsc_artifactory_base_url:
+
+# @var dsc_artifactory_username:description: Username for Artifactory authentication
+# @var dsc_artifactory_username:type: string
+# dsc_artifactory_username:
+
+# @var dsc_artifactory_password:description: Password for Artifactory authentication (use vault for production)
+# @var dsc_artifactory_password:type: string
+# dsc_artifactory_password:
+
+# @var dsc_artifactory_r_repo:description: Repository path for R packages in Artifactory
+# @var dsc_artifactory_r_repo:type: string
+# dsc_artifactory_r_repo: r-binaries
+
+# @var dsc_artifactory_timeout:description: Timeout in seconds for Artifactory downloads
+# @var dsc_artifactory_timeout:type: integer
+dsc_artifactory_timeout: 300

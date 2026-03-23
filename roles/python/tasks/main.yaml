@@ -5,10 +5,98 @@
   ansible.builtin.fail:
     msg: 'UBI CDN Python installation is only supported on RedHat-based systems. Set python_use_ubi_cdn: false or use a RedHat-based system.'
 
+- name: Set REQUESTS_CA_BUNDLE globally
+  when: python_requests_ca_bundle is defined
+  ansible.builtin.lineinfile:
+    path: /etc/environment
+    regexp: '^REQUESTS_CA_BUNDLE='
+    line: 'REQUESTS_CA_BUNDLE={{ python_requests_ca_bundle }}'
+    create: true
+    mode: '0644'
+
+- name: Remove REQUESTS_CA_BUNDLE when not configured
+  when: python_requests_ca_bundle is not defined
+  ansible.builtin.lineinfile:
+    path: /etc/environment
+    regexp: '^REQUESTS_CA_BUNDLE='
+    state: absent
+
+# UBI CDN path: Install Python from Red Hat UBI CDN
 - name: Execute UBI CDN installation
   when: python_use_ubi_cdn | bool and ansible_facts['os_family'] == 'RedHat'
   ansible.builtin.import_tasks: ubi_cdn.yaml
 
+# Artifactory path: Install Python from DEB/RPM packages
+- name: Include OS-specific tasks for Artifactory
+  when:
+    - not (python_use_ubi_cdn | bool)
+    - dsc_artifactory_enabled | default(false)
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] | lower }}.yaml"
+
+# Configure pip to use Artifactory PyPI mirror
+- name: Configure pip index URL for Artifactory
+  when:
+    - dsc_artifactory_enabled | default(false)
+    - dsc_artifactory_pypi_repo is defined
+  ansible.builtin.copy:
+    dest: /etc/pip.conf
+    mode: '0644'
+    content: |
+      [global]
+      index-url = {{ dsc_artifactory_base_url.split('://')[0] }}://{{ dsc_artifactory_username }}:{{ dsc_artifactory_password }}@{{ dsc_artifactory_base_url.split('://')[1] }}/api/pypi/{{ dsc_artifactory_pypi_repo }}/simple
+      trusted-host = {{ dsc_artifactory_base_url.split('://')[1].split('/')[0] }}
+
+# Jupyter integration (system packages - Artifactory or UBI CDN)
+- name: Install ipykernel for use in Jupyter (system)
+  when:
+    - (python_use_ubi_cdn | bool) or (dsc_artifactory_enabled | default(false))
+    - not ansible_check_mode
+  ansible.builtin.command: 'python{{ item }} -m pip install ipykernel'
+  loop: '{{ python_interpreter_versions }}'
+  register: pip_install_result
+  changed_when: "'Successfully installed' in pip_install_result.stdout"
+
+- name: Configure kernel in Jupyter (system)
+  when: (python_use_ubi_cdn | bool) or (dsc_artifactory_enabled | default(false))
+  ansible.builtin.command: "python{{ item }} -m ipykernel install --name py{{ item }} --display-name 'Python {{ item }}'"
+  loop: '{{ python_interpreter_versions }}'
+  changed_when: true
+
+# Default path: Install Python via uv
 - name: Execute uv installation
-  when: not (python_use_ubi_cdn | bool)
+  when:
+    - not (python_use_ubi_cdn | bool)
+    - not (dsc_artifactory_enabled | default(false))
   ansible.builtin.import_tasks: uv.yaml
+
+- name: Install pip for system Python (Artifactory/UBI CDN)
+  when:
+    - (python_use_ubi_cdn | bool) or (dsc_artifactory_enabled | default(false))
+    - not ansible_check_mode
+  ansible.builtin.command: 'python{{ item }} -m ensurepip --upgrade'
+  loop: '{{ python_interpreter_versions }}'
+  register: ensurepip_result
+  changed_when: "'Successfully installed' in ensurepip_result.stdout"
+  failed_when: false
+
+- name: Create unversioned Python symlinks for system packages
+  when: (python_use_ubi_cdn | bool) or (dsc_artifactory_enabled | default(false))
+  ansible.builtin.file:
+    src: '{{ item.1 }}'
+    dest: '/usr/local/bin/{{ item.0 }}'
+    state: link
+    force: true
+  loop:
+    - ['python', '/usr/bin/python{{ python_interpreter_versions | last }}']
+    - ['python3', '/usr/bin/python{{ python_interpreter_versions | last }}']
+    - ['pip', '/usr/bin/pip{{ python_interpreter_versions | last }}']
+    - ['pip3', '/usr/bin/pip{{ python_interpreter_versions | last }}']
+
+- name: Remove stale Python profile.d files when using system packages
+  when: (python_use_ubi_cdn | bool) or (dsc_artifactory_enabled | default(false))
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+  loop:
+    - /etc/profile.d/python.sh
+    - /etc/fish/conf.d/python.fish

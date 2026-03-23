@@ -1,0 +1,10 @@
+# Python installation via system package manager for RedHat family
+# This file is used when dsc_artifactory_enabled is true
+
+- name: Install Python via system package manager
+  ansible.builtin.dnf:
+    name:
+      - 'python{{ item }}'
+      - 'python{{ item }}-pip'
+    state: present
+  loop: '{{ python_interpreter_versions }}'

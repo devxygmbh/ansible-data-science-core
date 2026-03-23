@@ -3,6 +3,7 @@
 syslibs_packages_redhat:
   - cairo-devel
   - cargo
+  - cmake
   - fontconfig-devel
   - freetype-devel
   - freetds
@@ -35,11 +36,15 @@ syslibs_packages_redhat:
   - udunits2-devel
   - unixODBC-devel
   - zlib-devel
+  - openssl-devel
+  - freetype-devel
+  - libwebp-devel
 
 # @var syslibs_packages_ubuntu:type: list
 # @var syslibs_packages_ubuntu:description: System library packages to install on Ubuntu systems
 syslibs_packages_ubuntu:
   - cargo
+  - cmake
   - default-jdk-headless
   - freetds-common
   - git
@@ -74,6 +79,9 @@ syslibs_packages_ubuntu:
   - rustc
   - unixodbc-dev
   - zlib1g-dev
+  - libfreetype6-dev
+  - libwebp-dev
+  - libssl-dev
 
 # @var syslibs_extra_packages:type: list
 # @var syslibs_extra_packages:description: Additional packages to install on any platform (appended to the OS-specific list)

@@ -10,6 +10,10 @@ skip_list:
   - schema[meta-runtime]
   - yaml[empty-lines]
 
+# Mock modules that may not be available in the linting environment
+mock_modules:
+  - community.general.dnf_config_manager
+
 # otherwise ansible-lint scans the roles/collections from requirements.yml
 exclude_paths:
   - ansible_collections/

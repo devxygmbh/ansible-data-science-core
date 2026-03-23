@@ -1,10 +1,10 @@
-- name: Make sure /opt/R exists
+- name: Make sure R installation directory exists
   ansible.builtin.file:
-    path: /opt/R
+    path: '/opt/R'
     state: directory
     mode: '0755'
 
-- name: List installed R versions under /opt/R
+- name: List installed R versions
   ansible.builtin.stat:
     path: '/opt/R/{{ item }}/bin/R'
   loop: '{{ r_interpreter_versions }}'
@@ -17,6 +17,54 @@
 - name: Execute Ubuntu tasks
   when: ansible_facts['distribution'] == 'Ubuntu'
   ansible.builtin.import_tasks: ubuntu.yaml
+
+- name: Configure ccache in Makevars.site
+  when: r_source_build_use_ccache | bool
+  ansible.builtin.copy:
+    dest: '/opt/R/{{ item }}/lib/R/etc/Makevars.site'
+    mode: '0644'
+    content: |
+      CC=ccache gcc
+      CXX=ccache g++
+      CXX11=ccache g++
+      CXX14=ccache g++
+      CXX17=ccache g++
+      CXX20=ccache g++
+      FC=ccache gfortran
+      F77=ccache gfortran
+  loop: '{{ r_interpreter_versions }}'
+
+- name: Remove ccache Makevars.site when disabled
+  when: not (r_source_build_use_ccache | bool)
+  ansible.builtin.file:
+    path: '/opt/R/{{ item }}/lib/R/etc/Makevars.site'
+    state: absent
+  loop: '{{ r_interpreter_versions }}'
+
+- name: Create ccache cache directory
+  when: r_source_build_use_ccache | bool
+  ansible.builtin.file:
+    path: '{{ r_ccache_dir }}'
+    state: directory
+    mode: '1777'
+
+- name: Configure ccache cache directory
+  when: r_source_build_use_ccache | bool
+  ansible.builtin.copy:
+    dest: /etc/ccache.conf
+    mode: '0644'
+    content: |
+      max_size = 30.0G
+      cache_dir = {{ r_ccache_dir }}
+      hash_dir = false
+      sloppiness = include_file_ctime,include_file_mtime,time_macros,file_macro,locale
+      umask = 000
+
+- name: Remove ccache config when disabled
+  when: not (r_source_build_use_ccache | bool)
+  ansible.builtin.file:
+    path: /etc/ccache.conf
+    state: absent
 
 - name: Create Renviron and Rprofile
   ansible.builtin.blockinfile:
@@ -38,8 +86,30 @@
     marker: '# {mark} ANSIBLE MANAGED BLOCK'
   loop: '{{ r_interpreter_versions }}'
 
-- name: Configure /etc/Rprofile.site (default)
-  when: r_custom_repos is defined
+- name: Configure profile.d for bash (R)
+  ansible.builtin.copy:
+    dest: /etc/profile.d/r.sh
+    mode: '0755'
+    content: |
+      export PATH={% for ver in r_interpreter_versions | reverse %}/opt/R/{{ ver }}/bin{% if not loop.last %}:{% endif %}{% endfor %}:$PATH
+
+- name: Ensure fish config directory exists
+  ansible.builtin.file:
+    path: /etc/fish/conf.d
+    state: directory
+    mode: '0755'
+
+- name: Configure profile.d for fish (R)
+  ansible.builtin.copy:
+    dest: /etc/fish/conf.d/r.fish
+    mode: '0755'
+    content: |
+      set -gx PATH{% for ver in r_interpreter_versions | reverse %} '/opt/R/{{ ver }}/bin'{% endfor %} $PATH
+
+- name: Configure /etc/Rprofile.site (custom repos)
+  when:
+    - r_custom_repos is defined
+    - r_configure_default_cran_repo
   ansible.builtin.blockinfile:
     mode: '0644'
     create: true
