@@ -9,7 +9,7 @@ quarto_versions:
 quarto_installation_dir: /opt/quarto
 
 # @var quarto_add_to_path:type: boolean
-# @var quarto_add_to_path:description: Whether to add the executables to $PATH (bash)
+# @var quarto_add_to_path:description: Whether to add the executables to $PATH (bash and fish)
 quarto_add_to_path: true
 # ---
 

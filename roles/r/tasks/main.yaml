@@ -104,7 +104,7 @@
     dest: /etc/fish/conf.d/r.fish
     mode: '0755'
     content: |
-      set -gx PATH{% for ver in r_interpreter_versions | reverse %} '/opt/R/{{ ver }}/bin'{% endfor %} $PATH
+      fish_add_path{% for ver in r_interpreter_versions | reverse %} '/opt/R/{{ ver }}/bin'{% endfor %}
 
 - name: Configure /etc/Rprofile.site (custom repos)
   when:

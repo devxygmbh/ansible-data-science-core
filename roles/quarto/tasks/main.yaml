@@ -112,11 +112,12 @@
   changed_when: false
   loop: '{{ quarto_versions }}'
 
-- name: Add quarto to PATH
+- name: Add quarto to PATH (bash)
   when: quarto_add_to_path | bool
-  ansible.builtin.blockinfile:
-    path: /etc/profile.d/quarto.sh
-    block: |
+  ansible.builtin.copy:
+    dest: /etc/profile.d/quarto.sh
+    mode: '0755'
+    content: |
       {% set version_list = [] %}
       {% for version in quarto_versions %}
       {% set version_parts = version.split('.') %}
@@ -128,10 +129,27 @@
       {% set _ = path_additions.append(quarto_installation_dir + '/quarto-' + version + '/bin') %}
       {% endfor %}
       export PATH={{ path_additions | join(':') }}:$PATH
-    create: true
-    state: present
-    marker: '# {mark} ANSIBLE MANAGED BLOCK quarto'
-    mode: '0644'
+
+- name: Ensure fish config directory exists
+  when: quarto_add_to_path | bool
+  ansible.builtin.file:
+    path: /etc/fish/conf.d
+    state: directory
+    mode: '0755'
+
+- name: Add quarto to PATH (fish)
+  when: quarto_add_to_path | bool
+  ansible.builtin.copy:
+    dest: /etc/fish/conf.d/quarto.fish
+    mode: '0755'
+    content: |
+      {% set version_list = [] %}
+      {% for version in quarto_versions %}
+      {% set version_parts = version.split('.') %}
+      {% set _ = version_list.append([version, version_parts | map('int') | list]) %}
+      {% endfor %}
+      {% set sorted_versions = version_list | sort(attribute=1, reverse=True) | map(attribute=0) | list %}
+      fish_add_path{% for version in sorted_versions %} '{{ quarto_installation_dir }}/quarto-{{ version }}/bin'{% endfor %}
 
 - name: Use Quarto from new $PATH
   ansible.builtin.shell: |

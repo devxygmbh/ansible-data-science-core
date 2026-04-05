@@ -167,7 +167,7 @@
     dest: /etc/fish/conf.d/python.fish
     mode: '0755'
     content: |
-      set -gx PATH{% for ver in python_interpreter_versions | reverse %} '{{ python_installation_dir }}/{{ ver }}/bin'{% endfor %} $PATH
+      fish_add_path{% for ver in python_interpreter_versions | reverse %} '{{ python_installation_dir }}/{{ ver }}/bin'{% endfor %}
 
 - name: Install ipykernel for use in Jupyter
   ansible.builtin.command: '{{ python_uv_install_dir }}/uv pip install --break-system-packages --python {{ item.binary }} ipykernel'
