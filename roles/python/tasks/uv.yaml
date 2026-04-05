@@ -141,7 +141,7 @@
 
 - name: Create python compatibility symlink
   ansible.builtin.file:
-    src: '{{ item.cpython_dir }}/bin/python3'
+    src: python3
     dest: '{{ item.cpython_dir }}/bin/python'
     state: link
     force: true
