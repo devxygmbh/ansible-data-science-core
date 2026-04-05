@@ -96,7 +96,7 @@
   when: not ansible_check_mode
 
 - name: Find installed Python binaries
-  ansible.builtin.command: '{{ python_uv_install_dir }}/uv python find {{ item }}'
+  ansible.builtin.command: '{{ python_uv_install_dir }}/uv python find --managed-python {{ item }}'
   environment:
     UV_PYTHON_INSTALL_DIR: '{{ python_installation_dir }}'
   loop: '{{ python_interpreter_versions }}'
