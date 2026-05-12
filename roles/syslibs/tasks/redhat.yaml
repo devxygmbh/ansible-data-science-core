@@ -2,3 +2,4 @@
   ansible.builtin.dnf:
     name: '{{ syslibs_packages_redhat + syslibs_extra_packages }}'
     state: present
+    update_cache: true
