@@ -83,7 +83,6 @@ syslibs_packages_ubuntu:
   - libfreetype6-dev
   - libwebp-dev
   - libssl-dev
-  - libv8-dev
 
 # @var syslibs_extra_packages:type: list
 # @var syslibs_extra_packages:description: Additional packages to install on any platform (appended to the OS-specific list)
