@@ -3,3 +3,9 @@
     name: '{{ syslibs_packages_redhat + syslibs_extra_packages }}'
     state: present
     update_cache: true
+
+- name: Install V8 system libraries (RedHat, EL<10)
+  ansible.builtin.dnf:
+    name: '{{ syslibs_packages_redhat_v8 }}'
+    state: present
+  when: ansible_facts['distribution_major_version'] | int < 10

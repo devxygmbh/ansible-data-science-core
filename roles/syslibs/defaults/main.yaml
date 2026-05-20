@@ -39,7 +39,6 @@ syslibs_packages_redhat:
   - openssl-devel
   - freetype-devel
   - libwebp-devel
-  - v8-devel
 
 # @var syslibs_packages_ubuntu:type: list
 # @var syslibs_packages_ubuntu:description: System library packages to install on Ubuntu systems
@@ -83,6 +82,11 @@ syslibs_packages_ubuntu:
   - libfreetype6-dev
   - libwebp-dev
   - libssl-dev
+
+# @var syslibs_packages_redhat_v8:type: list
+# @var syslibs_packages_redhat_v8:description: V8 system libraries installed on RedHat-based systems where available (EPEL 8/9; not present in EPEL 10)
+syslibs_packages_redhat_v8:
+  - v8-devel
 
 # @var syslibs_extra_packages:type: list
 # @var syslibs_extra_packages:description: Additional packages to install on any platform (appended to the OS-specific list)
