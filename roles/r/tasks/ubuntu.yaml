@@ -14,6 +14,7 @@
     state: present
     update_cache: true
   loop:
+    - default-jdk-headless
     - g++
     - gdebi
     - gdebi-core
