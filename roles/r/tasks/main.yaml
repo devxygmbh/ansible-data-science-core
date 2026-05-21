@@ -21,7 +21,7 @@
 # Makes libjvm.so discoverable to rJava at load time by writing JAVA_HOME
 # and ldpaths into each R installation's etc/ files.
 - name: Configure R for Java (rJava)
-  ansible.builtin.command: '/opt/R/{{ item }}/bin/R CMD javareconf -e'
+  ansible.builtin.command: '/opt/R/{{ item }}/bin/R CMD javareconf'
   loop: '{{ r_interpreter_versions }}'
   changed_when: false
 
