@@ -19,9 +19,10 @@
   ansible.builtin.import_tasks: ubuntu.yaml
 
 # Makes libjvm.so discoverable to rJava at load time by writing JAVA_HOME
-# and ldpaths into each R installation's etc/ files.
+# and ldpaths into each R installation's etc/ files. umask is forced so the
+# files end up world-readable regardless of the sudo session's default.
 - name: Configure R for Java (rJava)
-  ansible.builtin.command: '/opt/R/{{ item }}/bin/R CMD javareconf'
+  ansible.builtin.shell: 'umask 0022 && /opt/R/{{ item }}/bin/R CMD javareconf'
   loop: '{{ r_interpreter_versions }}'
   changed_when: false
 
