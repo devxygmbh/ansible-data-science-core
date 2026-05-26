@@ -18,13 +18,41 @@
   when: ansible_facts['distribution'] == 'Ubuntu'
   ansible.builtin.import_tasks: ubuntu.yaml
 
-# Makes libjvm.so discoverable to rJava at load time by writing JAVA_HOME
-# and ldpaths into each R installation's etc/ files. umask is forced so the
-# files end up world-readable regardless of the sudo session's default.
+# javareconf writes etc/javaconf, etc/Makeconf, and etc/ldpaths so rJava
+# can compile and so the R shell wrapper exports LD_LIBRARY_PATH at launch.
+# umask is forced so the rewritten files stay world-readable regardless of
+# the sudo session's default.
 - name: Configure R for Java (rJava)
   ansible.builtin.shell: 'umask 0022 && /opt/R/{{ item }}/bin/R CMD javareconf'
   loop: '{{ r_interpreter_versions }}'
   changed_when: false
+
+# etc/ldpaths is only sourced by R's shell wrapper. Embedded R hosts like
+# Positron's ark kernel dlopen libR.so directly and skip the wrapper, so
+# libjvm.so ends up unreachable. Mirror the LD_LIBRARY_PATH export into
+# each R version's etc/Renviron (processed by libR during init) so the JVM
+# path is in scope regardless of how R was launched. The path is read out
+# of that R version's own etc/javaconf to keep per-version JDK selection
+# working if it's ever diverged.
+- name: Read JAVA_LD_LIBRARY_PATH per R version
+  ansible.builtin.shell: |
+    set -e
+    . /opt/R/{{ item }}/lib/R/etc/javaconf
+    printf '%s\n' "${JAVA_LD_LIBRARY_PATH}"
+  loop: '{{ r_interpreter_versions }}'
+  register: r_java_ld_paths
+  changed_when: false
+
+- name: Expose libjvm.so to embedded R via Renviron
+  when: item.stdout | length > 0
+  ansible.builtin.blockinfile:
+    path: '/opt/R/{{ item.item }}/lib/R/etc/Renviron'
+    marker: '# {mark} ANSIBLE MANAGED BLOCK (rJava)'
+    block: |
+      LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}{{ item.stdout }}
+  loop: '{{ r_java_ld_paths.results }}'
+  loop_control:
+    label: '{{ item.item }}'
 
 - name: Configure ccache in Makevars.site
   when: r_source_build_use_ccache | bool
