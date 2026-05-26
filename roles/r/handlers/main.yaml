@@ -1,1 +1,4 @@
 # handlers file for r
+- name: Run ldconfig
+  ansible.builtin.command: ldconfig
+  changed_when: true

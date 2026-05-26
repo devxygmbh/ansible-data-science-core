@@ -49,10 +49,24 @@
     path: '/opt/R/{{ item.item }}/lib/R/etc/Renviron'
     marker: '# {mark} ANSIBLE MANAGED BLOCK (rJava)'
     block: |
-      LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}{{ item.stdout }}
+      LD_LIBRARY_PATH={{ item.stdout }}:${LD_LIBRARY_PATH}
   loop: '{{ r_java_ld_paths.results }}'
   loop_control:
     label: '{{ item.item }}'
+
+# Belt-and-suspenders: register libjvm.so with the dynamic linker cache so
+# it resolves even when LD_LIBRARY_PATH is clobbered by an embedding host
+# (e.g. Positron/ark sets LD_LIBRARY_PATH=~autodetect, which leaks into
+# subprocesses spawned by install.packages() and breaks rJava's JNI test).
+- name: Register libjvm.so with the dynamic linker cache
+  when: jvm_lib_paths | length > 0
+  vars:
+    jvm_lib_paths: "{{ r_java_ld_paths.results | map(attribute='stdout') | reject('equalto', '') | unique | list }}"
+  ansible.builtin.copy:
+    dest: /etc/ld.so.conf.d/openjdk-jvm.conf
+    mode: '0644'
+    content: "{{ jvm_lib_paths | join('\n') }}\n"
+  notify: Run ldconfig
 
 - name: Configure ccache in Makevars.site
   when: r_source_build_use_ccache | bool
