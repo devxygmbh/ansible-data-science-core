@@ -13,7 +13,7 @@ steps:
   auto-release:
     image: codefloe.com/crow-plugins/auto-releaser:0.1.0
     settings:
-      tag_after: 14d
+      tag_after: 30d
       ssh_key:
         from_secret: devxy_bot_ssh_key
       smtp_host:
