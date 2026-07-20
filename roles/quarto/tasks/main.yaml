@@ -149,7 +149,3 @@
       {% endfor %}
       {% set sorted_versions = version_list | sort(attribute=1, reverse=True) | map(attribute=0) | list %}
       fish_add_path{% for version in sorted_versions %} '{{ quarto_installation_dir }}/quarto-{{ version }}/bin'{% endfor %}
-
-- name: Use Quarto from new $PATH
-  ansible.builtin.shell: |
-    source /etc/profile.d/quarto.sh
