@@ -12,9 +12,10 @@
 
 ## Outbound Connectivity
 
-| Purpose                                 | URL                                                  |
-| --------------------------------------- | ---------------------------------------------------- |
-| Infer latest release & Download release | <https://api.github.com/repos/quarto-dev/quarto-cli> |
+| Purpose                            | URL                                                 |
+| ---------------------------------- | --------------------------------------------------- |
+| Infer latest (pre-)release version | <https://quarto.org/docs/download/>                 |
+| Download release                   | <https://github.com/quarto-dev/quarto-cli/releases> |
 
 ## Supported Platforms
 

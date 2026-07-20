@@ -11,6 +11,14 @@ quarto_installation_dir: /opt/quarto
 # @var quarto_add_to_path:type: boolean
 # @var quarto_add_to_path:description: Whether to add the executables to $PATH (bash and fish)
 quarto_add_to_path: true
+
+# @var quarto_release_metadata_url:type: string
+# @var quarto_release_metadata_url:description: URL returning JSON with a `version` key for the latest Quarto release. Used to resolve the 'release' entry in `quarto_versions`.
+quarto_release_metadata_url: https://quarto.org/docs/download/_download.json
+
+# @var quarto_prerelease_metadata_url:type: string
+# @var quarto_prerelease_metadata_url:description: URL returning JSON with a `version` key for the latest Quarto pre-release. Used to resolve the 'pre-release' entry in `quarto_versions`.
+quarto_prerelease_metadata_url: https://quarto.org/docs/download/_prerelease.json
 # ---
 
 ### Optional vars

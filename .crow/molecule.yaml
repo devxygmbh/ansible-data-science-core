@@ -26,13 +26,21 @@ steps:
       PY_COLORS: 1
       DOCKER_HOST: tcp://docker:2375
       ANSIBLE_ROLES_PATH: ./roles
+      # renovate: datasource=github-releases depName=astral-sh/uv
+      UV_VERSION: 0.11.29
     commands:
-      - apk add -q --no-cache python3 python3-dev py3-pip gcc git curl build-base autoconf automake py3-cryptography linux-headers musl-dev libffi-dev openssl-dev openssh yaml-dev ca-certificates
-      - python3 --version
-      - python3 -m venv ~/venv/ansible-molecule
+      - apk add -q --no-cache python3 git curl ca-certificates
+      # The Alpine base ships Python 3.14, but ansible-compat refuses any
+      # Python >= 3.14 with ansible-core < 2.20, and we must stay on
+      # ansible-core<2.17 for rhel8 compat. Pin the control-node interpreter to
+      # 3.12 via uv (same as `just init-venv`) instead of relaxing that pin.
+      - curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh
+      - export PATH="$HOME/.local/bin:$PATH"
+      - uv venv --python 3.12 ~/venv/ansible-molecule
       - source ~/venv/ansible-molecule/bin/activate
+      - python3 --version
       # ansible-core<2.17 for compat with rhel8
-      - python3 -m pip install -q ansible-doctor "ansible-core<2.17" molecule-plugins[docker] cryptography
+      - uv pip install -q ansible-doctor "ansible-core<2.17" molecule-plugins[docker] cryptography
       - ansible --version
       - molecule --version
       - cd extensions
