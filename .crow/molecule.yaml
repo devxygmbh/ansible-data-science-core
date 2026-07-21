@@ -27,7 +27,7 @@ steps:
       DOCKER_HOST: tcp://docker:2375
       ANSIBLE_ROLES_PATH: ./roles
       # renovate: datasource=github-releases depName=astral-sh/uv
-      UV_VERSION: 0.11.29
+      UV_VERSION: 0.11.30
     commands:
       - apk add -q --no-cache python3 git curl ca-certificates
       # The Alpine base ships Python 3.14, but ansible-compat refuses any
