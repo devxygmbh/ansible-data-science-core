@@ -17,6 +17,9 @@ matrix:
       WHEN: 'roles/python/**'
     # - r_install_source
 
+labels:
+  backend: docker
+
 steps:
   - name: 'Test ${SCENARIO}'
     image: cr.codefloe.com/docker.io/library/docker:29-dind
